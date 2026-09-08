@@ -1,0 +1,173 @@
+{
+  "name": "Checkpoint 1 - Agente Pricing'.",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -528,
+        -96
+      ],
+      "id": "ebf86762-e3b9-4033-a1e7-fae7b46b95cb",
+      "name": "When chat message received",
+      "webhookId": "afb3c741-29b9-4c4f-9bd3-70e12276b721"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "ROL\nSos el Asistente de Inteligencia de Precios de un equipo de e-commerce en MercadoLibre. Tu función es responder consultas sobre el catálogo de productos y su situación de precios frente a la competencia.\n\nÁMBITO\nTrabajás únicamente sobre la información disponible en la hoja de cálculo de catálogo conectada. No inventás precios, SKUs ni datos que no estén en esa fuente. Si un dato no está disponible, lo decís explícitamente en vez de asumirlo.\n\nOBJETIVO\nAnte cada consulta, evaluá si necesitás datos del catálogo para responder con precisión. Si es así, consultá la herramienta de Google Sheets antes de contestar. Entregá respuestas breves, concretas y accionables para un analista de pricing.\n\nREGLAS Y ESCALAMIENTO\n- No tenés permitido modificar, borrar ni escribir datos en la hoja de cálculo: solo lectura.\n- No tenés permitido enviar comunicaciones a clientes ni a terceros externos al equipo.\n- No tenés permitido tomar decisiones de cambio de precio: solo informás y sugerís, la decisión final es humana.\n- Si la consulta excede tu ámbito (por ejemplo, pedidos de facturación, legales o de otro área), indicá que corresponde escalar a una persona del equipo.\n- Mantené un tono profesional y directo, sin lenguaje informal.",
+          "maxIterations": 6
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -320,
+        -96
+      ],
+      "id": "1c96a81a-21e1-44a1-8188-f85c37bccac1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        96
+      ],
+      "id": "3bc28534-2756-49be-81aa-692d1c22cf87",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CWI4IXxaHXVqgH0e",
+          "name": "Gemini Free"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Usá esta herramienta para leer el catálogo de productos cuando la consulta del usuario mencione un SKU, nombre de producto específico, categoría, stock, ventas, región, cliente o pida comparaciones con la competencia. Activala SIEMPRE que necesites verificar un dato concreto antes de responder (precio, margen, stock, riesgo de quiebre, canal de venta, zona). No la actives para preguntas generales sobre pricing que no requieran datos puntuales del catálogo.",
+        "documentId": {
+          "__rl": true,
+          "value": "1bo8ZmqrW2IHj5s8uHqjZ-halx1jVoyXQT0OaaY9G580",
+          "mode": "list",
+          "cachedResultName": "catalogo_pricing_completo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bo8ZmqrW2IHj5s8uHqjZ-halx1jVoyXQT0OaaY9G580/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 918640382,
+          "mode": "list",
+          "cachedResultName": "catalogo_pricing_completo.csv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1bo8ZmqrW2IHj5s8uHqjZ-halx1jVoyXQT0OaaY9G580/edit#gid=918640382"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -176,
+        112
+      ],
+      "id": "6cc20e32-07ed-42ac-ba96-80e4515880c7",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "gianfrancodastolfo@gmail.com",
+        "subject": "Reporte del Agente de Pricing",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        -96
+      ],
+      "id": "eab8eebd-e94a-4309-9ae6-f4b6e1acd414",
+      "name": "Send a message",
+      "webhookId": "e68654b2-3075-420e-94c4-1ecf7bd1e693",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ymt66CwwNVqyZcw7",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "29ad8e47-a81c-4bab-8e39-f10e8bbdc190",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0184c1632add9302e46b1e76dd6c5af0b14204c01d411de378d16c62e10a30be"
+  },
+  "nodeGroups": [],
+  "id": "7hzydWR3jYLBQqEI",
+  "tags": []
+}
