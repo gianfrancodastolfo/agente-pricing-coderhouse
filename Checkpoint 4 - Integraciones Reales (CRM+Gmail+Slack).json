@@ -1,0 +1,378 @@
+{
+  "name": "Checkpoint 4 - Integraciones Reales (CRM+Gmail+Slack)",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d1487ebf-e9ac-4e15-b070-a02d9a41194f",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ymt66CwwNVqyZcw7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5cefd68c-dc9f-4513-89e4-8534971bd071",
+              "leftValue": "=$json.subject",
+              "rightValue": "Auto-reply",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "2489db13-52fd-4e4d-980d-4be47c1aa387",
+              "leftValue": "=$json.subject",
+              "rightValue": "Out of office",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "6ac80fec-e433-4456-8aea-95c1b2b29834",
+              "leftValue": "=$json.subject",
+              "rightValue": "Undeliverable",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "94fb6c91-aa25-4efa-89e5-22a7ee7ba034",
+              "leftValue": "=$json.from",
+              "rightValue": "no-reply@",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "4a4c5cf8-6b8e-4dbe-aba9-9e3482dfa48a",
+      "name": "Es Auto-Reply?"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Nuevo mail entrante.\nDe: {{ $json.from }}\nAsunto: {{ $json.subject }}\nCuerpo: {{ $json.textPlain || $json.snippet }}\n\nClasifica esta consulta (venta, soporte, reclamo u otro) y redacta una respuesta breve, profesional y cordial en espanol para enviar como borrador.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        448,
+        96
+      ],
+      "id": "606a3dd5-a3e2-4f9c-8ab4-7336b2400692",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        320,
+        176
+      ],
+      "id": "cf789f1b-a22f-480f-990f-4d2abf208386",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "CWI4IXxaHXVqgH0e",
+          "name": "Gemini Free"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -64
+      ],
+      "id": "e3f03754-a4ef-45ae-bc51-58464c1bb3d1",
+      "name": "Descartado (Auto-Reply)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3154a5ad-4b9b-44a2-8720-1bdcba0fb64e",
+              "name": "from",
+              "value": "=$('Gmail Trigger').item.json.from",
+              "type": "string"
+            },
+            {
+              "id": "56a33588-ddc7-40dd-8d35-d858298a83b4",
+              "name": "subject",
+              "value": "=$('Gmail Trigger').item.json.subject",
+              "type": "string"
+            },
+            {
+              "id": "b132d1f4-6cec-4f8d-b7f3-d2a411981c47",
+              "name": "bodyText",
+              "value": "=$('Gmail Trigger').item.json.textPlain || $('Gmail Trigger').item.json.snippet",
+              "type": "string"
+            },
+            {
+              "id": "da5fe428-6316-4936-a106-ce28f46e541f",
+              "name": "respuesta_ai",
+              "value": "=$json.output",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        672,
+        96
+      ],
+      "id": "ed2b55b0-310a-4d7d-8349-46666e90c70b",
+      "name": "Limpiar Payload"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "filterGroupsUi": {
+          "filterGroupsValues": [
+            {
+              "filtersUi": {
+                "filterValues": [
+                  {
+                    "propertyName": "=email",
+                    "value": "=$('Limpiar Payload').item.json.from"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        320
+      ],
+      "id": "c318cf78-ca68-4851-82a3-fc8e8ed24364",
+      "name": "Buscar Contacto HubSpot"
+    },
+    {
+      "parameters": {
+        "email": "=$('Limpiar Payload').item.json.from",
+        "additionalFields": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 2.2,
+      "position": [
+        736,
+        752
+      ],
+      "id": "183625fe-d9fd-4177-b2c1-83c65637aea2",
+      "name": "Crear/Actualizar Contacto HubSpot"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Re: {{$('Limpiar Payload').item.json.subject}}",
+        "message": "=$('Limpiar Payload').item.json.respuesta_ai",
+        "options": {
+          "sendTo": "=$('Limpiar Payload').item.json.from"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        592
+      ],
+      "id": "63eb42ec-e467-4208-b774-9627bf5ebe87",
+      "name": "Crear Borrador de Respuesta",
+      "webhookId": "86f6ffe9-dc05-4b55-8b42-ae4900ee8498",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ymt66CwwNVqyZcw7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#pricing-alertas",
+          "mode": "name"
+        },
+        "text": "Nuevo contacto procesado por el agente: {{$('Limpiar Payload').item.json.from}} | Asunto: {{$('Limpiar Payload').item.json.subject}}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.7,
+      "position": [
+        800,
+        592
+      ],
+      "id": "3e0a771b-8762-4ff8-a589-d4be14834067",
+      "name": "Notificar Slack Pricing",
+      "webhookId": "575d4c9c-4d3a-4543-b063-d2f6d95c1f91"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Es Auto-Reply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Auto-Reply?": {
+      "main": [
+        [
+          {
+            "node": "Descartado (Auto-Reply)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Limpiar Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar Payload": {
+      "main": [
+        [
+          {
+            "node": "Buscar Contacto HubSpot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Contacto HubSpot": {
+      "main": [
+        [
+          {
+            "node": "Crear/Actualizar Contacto HubSpot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear/Actualizar Contacto HubSpot": {
+      "main": [
+        [
+          {
+            "node": "Crear Borrador de Respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Borrador de Respuesta": {
+      "main": [
+        [
+          {
+            "node": "Notificar Slack Pricing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8ac4d177-f0e9-4bfc-a35b-4c65229f6831",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0184c1632add9302e46b1e76dd6c5af0b14204c01d411de378d16c62e10a30be"
+  },
+  "nodeGroups": [],
+  "id": "jVyYnltmdpORgnVf",
+  "tags": []
+}
