@@ -1,0 +1,2325 @@
+{
+  "name": "PF - Manager Orquestador Asincrónico",
+  "nodes": [
+    {
+      "id": "83b350f2-0c99-4435-89e3-63f6a61eec7e",
+      "name": "Webhook: Recibir Solicitud",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agente-pricing",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "webhookId": "0385075e-936e-4b61-a57a-0a080f4faf54"
+    },
+    {
+      "id": "4a743808-aafa-42cd-a218-ffd722c57bea",
+      "name": "Normalizar Solicitud",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6f0fb9cf-2fc9-4e25-b960-5c1bdd6f200f",
+              "name": "consulta",
+              "value": "={{ String($json.body.consulta || $json.body.chatInput || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "a153da7f-9aeb-476f-9146-d809b92fcb42",
+              "name": "sessionId",
+              "value": "={{ $json.body.sessionId || 'anonimo' }}",
+              "type": "string"
+            },
+            {
+              "id": "5f26cdac-abd9-4569-9bab-8be03df13ca9",
+              "name": "canal",
+              "value": "={{ $json.body.canal || 'webhook' }}",
+              "type": "string"
+            },
+            {
+              "id": "e6a4fdf4-debb-46e2-8950-1539586e7f32",
+              "name": "traceId",
+              "value": "={{ 'trc-' + $execution.id + '-' + $now.toMillis() }}",
+              "type": "string"
+            },
+            {
+              "id": "60782bc6-b2c3-4025-af2a-947291d32d86",
+              "name": "requestId",
+              "value": "={{ $json.body.requestId || $json.headers['idempotency-key'] || (($json.body.sessionId || 'anonimo') + '-' + String($json.body.consulta || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + '-' + $now.toFormat('yyyyMMddHH')) }}",
+              "type": "string"
+            },
+            {
+              "id": "013f3ec7-26d2-477f-92c0-b71a2455c460",
+              "name": "fecha_recepcion",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "ae625e32-c0eb-4558-b5dd-f60302d3802c",
+      "name": "¿Consulta válida?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f74134e8-d561-4b9c-b85d-3410e365c887",
+              "leftValue": "={{ $json.consulta }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "8b3bff77-5cff-40c6-9239-c2912f456ca5",
+      "name": "Responder 400 (consulta vacía)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        660,
+        220
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ estado: 'rechazado', motivo: 'Falta el campo consulta', traceId: $json.traceId }) }}",
+        "options": {
+          "responseCode": 400
+        }
+      }
+    },
+    {
+      "id": "65f8c252-8aba-4c71-a392-2b05b1cda3c7",
+      "name": "Control de Duplicados (Log)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI",
+          "mode": "list",
+          "cachedResultName": "log_trazabilidad_agente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 34402296,
+          "mode": "list",
+          "cachedResultName": "log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit#gid=34402296"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "requestId",
+              "lookupValue": "={{ $('Normalizar Solicitud').first().json.requestId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "3c892d49-65fc-4f8a-8463-af771fd44876",
+      "name": "¿Solicitud duplicada?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9b6f8b32-7478-4761-baf0-689086c5a7f9",
+              "leftValue": "={{ $json.requestId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "1a09d350-16b8-457f-839a-aa850527daaf",
+      "name": "Responder 200 (ya recibida)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1100,
+        220
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ estado: 'duplicado', mensaje: 'Esta solicitud ya fue recibida y no se procesa de nuevo (idempotencia).', requestId: $('Normalizar Solicitud').first().json.requestId, estado_actual: $json.estado }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "7870856f-30db-4061-b429-a2ce27b327c8",
+      "name": "Responder 202 (recibido)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ estado: 'recibido', mensaje: 'Solicitud recibida. Se procesa en segundo plano; la respuesta validada llega por mail.', requestId: $('Normalizar Solicitud').first().json.requestId, traceId: $('Normalizar Solicitud').first().json.traceId }) }}",
+        "options": {
+          "responseCode": 202
+        }
+      }
+    },
+    {
+      "id": "7dad2b3e-2def-4153-95db-23b4737a3e2f",
+      "name": "Registrar Recepción (Log)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1320,
+        0
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI",
+          "mode": "list",
+          "cachedResultName": "log_trazabilidad_agente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 34402296,
+          "mode": "list",
+          "cachedResultName": "log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit#gid=34402296"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "requestId": "={{ $('Normalizar Solicitud').first().json.requestId }}",
+            "traceId": "={{ $('Normalizar Solicitud').first().json.traceId }}",
+            "fecha_recepcion": "={{ $('Normalizar Solicitud').first().json.fecha_recepcion }}",
+            "sessionId": "={{ $('Normalizar Solicitud').first().json.sessionId }}",
+            "canal": "={{ $('Normalizar Solicitud').first().json.canal }}",
+            "consulta": "={{ $('Normalizar Solicitud').first().json.consulta }}",
+            "estado": "en_proceso"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "traceId",
+              "displayName": "traceId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_recepcion",
+              "displayName": "fecha_recepcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal",
+              "displayName": "canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consulta",
+              "displayName": "consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "worker",
+              "displayName": "worker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta",
+              "displayName": "respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "exactitud_factual",
+              "displayName": "exactitud_factual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cobertura_consulta",
+              "displayName": "cobertura_consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tono_profesional",
+              "displayName": "tono_profesional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ausencia_alucinaciones",
+              "displayName": "ausencia_alucinaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "puntaje_global",
+              "displayName": "puntaje_global",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "veredicto_juez",
+              "displayName": "veredicto_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "razon_juez",
+              "displayName": "razon_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evaluacion_json",
+              "displayName": "evaluacion_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "revision_humana",
+              "displayName": "revision_humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "b9cc05a2-72ec-4e96-ac05-638a24443197",
+      "name": "Buscar Memoria de Sesión",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1600,
+        0
+      ],
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1-npepe_HdbeJmSTkwUy8BV3nLMiW5tI5V-JlcMMRBhI",
+          "mode": "list",
+          "cachedResultName": "memoria_sesiones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-npepe_HdbeJmSTkwUy8BV3nLMiW5tI5V-JlcMMRBhI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1552037146,
+          "mode": "list",
+          "cachedResultName": "memoria_sesiones.csv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-npepe_HdbeJmSTkwUy8BV3nLMiW5tI5V-JlcMMRBhI/edit#gid=1552037146"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Session_ID",
+              "lookupValue": "={{ $('Normalizar Solicitud').first().json.sessionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "534577f8-2f88-40ae-b00f-946b23125a8f",
+      "name": "Armar Contexto de Memoria",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1820,
+        0
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1bcae9a-c2a0-40f6-8742-96beedb0204e",
+              "name": "consulta",
+              "value": "={{ $('Normalizar Solicitud').first().json.consulta }}",
+              "type": "string"
+            },
+            {
+              "id": "5a57a684-f51b-4ee6-9862-8dcf48ba6a0b",
+              "name": "sessionId",
+              "value": "={{ $('Normalizar Solicitud').first().json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "32fb26f0-5f74-4291-bfca-aa9f9c84f677",
+              "name": "traceId",
+              "value": "={{ $('Normalizar Solicitud').first().json.traceId }}",
+              "type": "string"
+            },
+            {
+              "id": "a325ba89-1656-4da3-9135-69a52b1fa941",
+              "name": "requestId",
+              "value": "={{ $('Normalizar Solicitud').first().json.requestId }}",
+              "type": "string"
+            },
+            {
+              "id": "aedfec0f-344c-425d-8a95-67b386f43d1b",
+              "name": "canal",
+              "value": "={{ $('Normalizar Solicitud').first().json.canal }}",
+              "type": "string"
+            },
+            {
+              "id": "8f281b38-1dd2-4444-94f2-3c79943b0c7c",
+              "name": "memoria_contexto",
+              "value": "=[INICIO DE CONTEXTO COMPARTIDO]\nEstado del caso: {{ $json.Estado_del_Caso || 'Nuevo' }}. Resumen de la última interacción: {{ $json.Resumen_Consolidado || 'No hay historial previo, es la primera interacción con este usuario.' }}\n[FIN DEL CONTEXTO COMPARTIDO]",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "executeOnce": true
+    },
+    {
+      "id": "c5f7f4a2-714b-4f6c-84fc-8f45d915fe61",
+      "name": "Delegar a Worker Consulta (RAG + Catálogo)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2040,
+        0
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "PlMXXktxX3GO5FuM",
+          "mode": "list",
+          "cachedResultName": "Worker 1 - Consulta de Datos",
+          "cachedResultUrl": "/workflow/PlMXXktxX3GO5FuM"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "e72ebe49-8af4-44e9-9c8b-d0c4a93f7edd",
+      "name": "Preparar Evaluación",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2280,
+        -20
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0056d17-90fa-43a4-9a00-782c6fc37372",
+              "name": "consulta",
+              "value": "={{ $('Armar Contexto de Memoria').first().json.consulta }}",
+              "type": "string"
+            },
+            {
+              "id": "5885ef0e-d52e-4ee4-8a16-f9be9b3d394c",
+              "name": "respuesta",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            },
+            {
+              "id": "be0bd286-1027-4ec2-a7cd-19779e50df2b",
+              "name": "worker",
+              "value": "Worker 1 - Consulta de Datos (RAG + Catálogo)",
+              "type": "string"
+            },
+            {
+              "id": "dc163578-6d4c-4443-babd-6de3d60fc5da",
+              "name": "sessionId",
+              "value": "={{ $('Armar Contexto de Memoria').first().json.sessionId }}",
+              "type": "string"
+            },
+            {
+              "id": "f73eec29-f6e5-478b-945b-2509be5f6295",
+              "name": "traceId",
+              "value": "={{ $('Armar Contexto de Memoria').first().json.traceId }}",
+              "type": "string"
+            },
+            {
+              "id": "bb6800e5-e545-4c52-9e96-6f43098e8448",
+              "name": "requestId",
+              "value": "={{ $('Armar Contexto de Memoria').first().json.requestId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "c852780b-8760-4cc0-9405-493f820d7596",
+      "name": "Supervisor: Juez de Calidad",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2500,
+        -20
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "mHPRY9AhPEBUoH72",
+          "mode": "list",
+          "cachedResultName": "PF - Juez de Calidad (Supervisor)",
+          "cachedResultUrl": "/workflow/mHPRY9AhPEBUoH72"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "ea48e4ea-8496-4ce6-9a25-826af754df03",
+      "name": "Registrar Evaluación (Log)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2760,
+        -240
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI",
+          "mode": "list",
+          "cachedResultName": "log_trazabilidad_agente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 34402296,
+          "mode": "list",
+          "cachedResultName": "log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit#gid=34402296"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "requestId": "={{ $json.requestId }}",
+            "worker": "={{ $json.worker }}",
+            "respuesta": "={{ $json.respuesta }}",
+            "exactitud_factual": "={{ $json.evaluacion.exactitud_factual }}",
+            "cobertura_consulta": "={{ $json.evaluacion.cobertura_consulta }}",
+            "tono_profesional": "={{ $json.evaluacion.tono_profesional }}",
+            "ausencia_alucinaciones": "={{ $json.evaluacion.ausencia_alucinaciones }}",
+            "puntaje_global": "={{ $json.evaluacion.puntaje_global }}",
+            "veredicto_juez": "={{ $json.evaluacion.veredicto_juez }}",
+            "razon_juez": "={{ $json.evaluacion.razon }}",
+            "decision": "={{ $json.decision }}",
+            "evaluacion_json": "={{ JSON.stringify($json.evaluacion) }}",
+            "estado": "={{ $json.decision === 'Aceptado' ? 'aprobado_automatico' : 'en_revision_humana' }}"
+          },
+          "matchingColumns": [
+            "requestId"
+          ],
+          "schema": [
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "traceId",
+              "displayName": "traceId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_recepcion",
+              "displayName": "fecha_recepcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal",
+              "displayName": "canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consulta",
+              "displayName": "consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "worker",
+              "displayName": "worker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta",
+              "displayName": "respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "exactitud_factual",
+              "displayName": "exactitud_factual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cobertura_consulta",
+              "displayName": "cobertura_consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tono_profesional",
+              "displayName": "tono_profesional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ausencia_alucinaciones",
+              "displayName": "ausencia_alucinaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "puntaje_global",
+              "displayName": "puntaje_global",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "veredicto_juez",
+              "displayName": "veredicto_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "razon_juez",
+              "displayName": "razon_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evaluacion_json",
+              "displayName": "evaluacion_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "revision_humana",
+              "displayName": "revision_humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "89234903-e5c7-4a07-a07c-901cfc4792b2",
+      "name": "Switch: Decisión del Supervisor",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        2760,
+        -20
+      ],
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5bafe8c1-b9f3-457b-82cf-f6a71ae97f58",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "Aceptado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Aceptado"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "c141ae0f-26d7-4e9c-8b6b-8be06f75704b",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "Corregir",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Corregir"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "a0c9fdd0-b538-473d-8369-fcc388649339",
+                    "leftValue": "={{ $json.decision }}",
+                    "rightValue": "Rechazado",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rechazado"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "gianfrancodastolfo@gmail.com",
+        "subject": "=[Agente de Pricing] Revisión humana requerida · {{ $json.requestId }}",
+        "message": "={{ $json.decision === 'Rechazado' ? '❌ Respuesta RECHAZADA por el Juez' : '🔎 Respuesta a CORREGIR según el Juez' }} — Agente de Inteligencia de Precios\nLa autonomía quedó congelada: {{ $json.motivos_umbral }}\n\nConsulta: {{ $json.consulta }}\n\nRespuesta propuesta por el agente:\n{{ String($json.respuesta).slice(0, 3000) }}\n\nRúbrica del Juez: exactitud {{ $json.evaluacion.exactitud_factual }}/5 · cobertura {{ $json.evaluacion.cobertura_consulta }}/5 · tono {{ $json.evaluacion.tono_profesional }}/5 · sin alucinaciones {{ $json.evaluacion.ausencia_alucinaciones }}/5\nMotivo del Juez: {{ $json.evaluacion.razon }}\nCódigo de seguimiento: {{ $json.requestId }}\n\n¿Se envía igual al usuario? (los botones se abren desde la PC donde corre n8n)",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "Aprobar y enviar",
+            "disapproveLabel": "Descartar"
+          }
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "272ea44e-5404-402f-9adf-4f83c9b8aa6a",
+      "name": "Cola de Aprobación Humana (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3040,
+        160
+      ],
+      "webhookId": "ccf8e9b1-4068-4541-a45d-16879862e048",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ymt66CwwNVqyZcw7",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "id": "b9e65007-a353-45b5-8050-e8e63d6068f1",
+      "name": "¿Aprobada por el revisor?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3260,
+        160
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "43b890d0-f400-43ed-bbd9-41c37c99a9a5",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "365c4f2d-8873-40d0-bb25-04fb71407fbb",
+      "name": "Marcar Aprobación Humana",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3480,
+        60
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify(Object.assign({}, $('Supervisor: Juez de Calidad').first().json, { aprobado_por: 'revisor humano (Telegram)' })) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "f7a9cf79-89ca-4813-8b09-7c8a7561d2d3",
+      "name": "Registrar Descarte (Log)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3480,
+        300
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI",
+          "mode": "list",
+          "cachedResultName": "log_trazabilidad_agente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 34402296,
+          "mode": "list",
+          "cachedResultName": "log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit#gid=34402296"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "requestId": "={{ $('Supervisor: Juez de Calidad').first().json.requestId }}",
+            "estado": "descartado_por_revisor",
+            "revision_humana": "rechazada",
+            "fecha_cierre": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "requestId"
+          ],
+          "schema": [
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "traceId",
+              "displayName": "traceId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_recepcion",
+              "displayName": "fecha_recepcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal",
+              "displayName": "canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consulta",
+              "displayName": "consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "worker",
+              "displayName": "worker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta",
+              "displayName": "respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "exactitud_factual",
+              "displayName": "exactitud_factual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cobertura_consulta",
+              "displayName": "cobertura_consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tono_profesional",
+              "displayName": "tono_profesional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ausencia_alucinaciones",
+              "displayName": "ausencia_alucinaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "puntaje_global",
+              "displayName": "puntaje_global",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "veredicto_juez",
+              "displayName": "veredicto_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "razon_juez",
+              "displayName": "razon_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evaluacion_json",
+              "displayName": "evaluacion_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "revision_humana",
+              "displayName": "revision_humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "37f70519-b498-4be3-99d9-aa733b6e562f",
+      "name": "Despachar Respuesta (Worker Despacho)",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        3720,
+        -20
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "P1OS0qJWxkzUgl7o",
+          "mode": "list",
+          "cachedResultName": "PF - Worker Despacho (Notificación)",
+          "cachedResultUrl": "/workflow/P1OS0qJWxkzUgl7o"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "9b3e0857-bd23-4b8b-ad0a-ecea157aef34",
+      "name": "Cerrar Caso (Log)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3960,
+        -20
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI",
+          "mode": "list",
+          "cachedResultName": "log_trazabilidad_agente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 34402296,
+          "mode": "list",
+          "cachedResultName": "log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit#gid=34402296"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "requestId": "={{ $json.requestId }}",
+            "estado": "={{ $json.aprobado_por ? 'despachado_tras_revision' : 'despachado_automatico' }}",
+            "revision_humana": "={{ $json.aprobado_por ? 'aprobada' : 'no requerida' }}",
+            "fecha_cierre": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "requestId"
+          ],
+          "schema": [
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "traceId",
+              "displayName": "traceId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_recepcion",
+              "displayName": "fecha_recepcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal",
+              "displayName": "canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consulta",
+              "displayName": "consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "worker",
+              "displayName": "worker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta",
+              "displayName": "respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "exactitud_factual",
+              "displayName": "exactitud_factual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cobertura_consulta",
+              "displayName": "cobertura_consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tono_profesional",
+              "displayName": "tono_profesional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ausencia_alucinaciones",
+              "displayName": "ausencia_alucinaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "puntaje_global",
+              "displayName": "puntaje_global",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "veredicto_juez",
+              "displayName": "veredicto_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "razon_juez",
+              "displayName": "razon_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evaluacion_json",
+              "displayName": "evaluacion_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "revision_humana",
+              "displayName": "revision_humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "0293568c-41ff-444c-9c9e-a89766f01cfd",
+      "name": "Actualizar Memoria de Sesión",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4200,
+        -20
+      ],
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-npepe_HdbeJmSTkwUy8BV3nLMiW5tI5V-JlcMMRBhI",
+          "mode": "list",
+          "cachedResultName": "memoria_sesiones",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-npepe_HdbeJmSTkwUy8BV3nLMiW5tI5V-JlcMMRBhI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1552037146,
+          "mode": "list",
+          "cachedResultName": "memoria_sesiones.csv",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-npepe_HdbeJmSTkwUy8BV3nLMiW5tI5V-JlcMMRBhI/edit#gid=1552037146"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Session_ID": "={{ $('Despachar Respuesta (Worker Despacho)').first().json.sessionId }}",
+            "Fecha_Actualizacion": "={{ $now.toISO() }}",
+            "Resumen_Consolidado": "={{ 'Última consulta: ' + $('Despachar Respuesta (Worker Despacho)').first().json.consulta.slice(0, 200) + ' | Respuesta validada (' + $('Despachar Respuesta (Worker Despacho)').first().json.decision + ') enviada por mail.' }}",
+            "Estado_del_Caso": "Resuelto",
+            "Datos_Clave": "={{ JSON.stringify({ ultimo_requestId: $('Despachar Respuesta (Worker Despacho)').first().json.requestId, ultimo_puntaje: $('Despachar Respuesta (Worker Despacho)').first().json.evaluacion.puntaje_global }) }}"
+          },
+          "matchingColumns": [
+            "Session_ID"
+          ],
+          "schema": [
+            {
+              "id": "Session_ID",
+              "displayName": "Session_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Fecha_Actualizacion",
+              "displayName": "Fecha_Actualizacion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resumen_Consolidado",
+              "displayName": "Resumen_Consolidado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Estado_del_Caso",
+              "displayName": "Estado_del_Caso",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Datos_Clave",
+              "displayName": "Datos_Clave",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "b9ab0bea-c655-43c8-8475-d567412e0091",
+      "name": "Alerta de Falla (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2500,
+        400
+      ],
+      "parameters": {
+        "chatId": "1650392150",
+        "text": "=⚠️ Falla en el procesamiento — Agente de Inteligencia de Precios\n\nCódigo: {{ String($('Normalizar Solicitud').first().json.requestId).replace(/[_*`\\[\\]]/g, ' ') }}\nConsulta: {{ String($('Normalizar Solicitud').first().json.consulta).replace(/[_*`\\[\\]]/g, ' ') }}\nError: {{ (typeof $json.error === 'string' ? $json.error : JSON.stringify($json.error || 'sin detalle')).slice(0, 400).replace(/[_*`\\[\\]]/g, ' ') }}\n\nLa solicitud NO recibió respuesta automática (se reintentó antes de alertar). Requiere atención manual.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "id": "somADnNvwhaIBqHk",
+          "name": "Telegram account"
+        }
+      },
+      "webhookId": "061d4248-7030-4c1d-9c41-b44263215158",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "9c269a49-0db4-4671-ab61-2b03d7409798",
+      "name": "Registrar Error (Log)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2760,
+        400
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI",
+          "mode": "list",
+          "cachedResultName": "log_trazabilidad_agente",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 34402296,
+          "mode": "list",
+          "cachedResultName": "log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1noQt2dtAzdSUzVkM_4zYuiyeqaLdgG5jc7He1OarukI/edit#gid=34402296"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "requestId": "={{ $('Normalizar Solicitud').first().json.requestId }}",
+            "estado": "error_alertado",
+            "fecha_cierre": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "requestId"
+          ],
+          "schema": [
+            {
+              "id": "requestId",
+              "displayName": "requestId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "traceId",
+              "displayName": "traceId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_recepcion",
+              "displayName": "fecha_recepcion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sessionId",
+              "displayName": "sessionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "canal",
+              "displayName": "canal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "consulta",
+              "displayName": "consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "worker",
+              "displayName": "worker",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "respuesta",
+              "displayName": "respuesta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "exactitud_factual",
+              "displayName": "exactitud_factual",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cobertura_consulta",
+              "displayName": "cobertura_consulta",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "tono_profesional",
+              "displayName": "tono_profesional",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ausencia_alucinaciones",
+              "displayName": "ausencia_alucinaciones",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "puntaje_global",
+              "displayName": "puntaje_global",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "veredicto_juez",
+              "displayName": "veredicto_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "razon_juez",
+              "displayName": "razon_juez",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "decision",
+              "displayName": "decision",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "evaluacion_json",
+              "displayName": "evaluacion_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "estado",
+              "displayName": "estado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "revision_humana",
+              "displayName": "revision_humana",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "fecha_cierre",
+              "displayName": "fecha_cierre",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FIZT16Ls3r9Ok7ub",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "2f955e1c-383b-45d7-b814-19ada66c7c9b",
+      "name": "Descartar Duplicado",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        220
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "8b75a73b-0377-4327-a65e-b7456b00f6e2",
+      "name": "S1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -260
+      ],
+      "parameters": {
+        "content": "## 1 · Recepción asincrónica e idempotencia\nEl webhook valida la solicitud, descarta duplicados (mismo requestId) y responde **al instante** con un código de seguimiento (202). Todo lo demás corre en segundo plano.",
+        "height": 640,
+        "width": 1560,
+        "color": 7
+      }
+    },
+    {
+      "id": "fda1d21e-fcad-4c1e-9983-b0e957e0f024",
+      "name": "S2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        -260
+      ],
+      "parameters": {
+        "content": "## 2 · Memoria + Worker de Consulta\nRecupera la memoria persistente de la sesión y delega al Worker de Consulta (RAG con cita de fuentes + catálogo).",
+        "height": 640,
+        "width": 680,
+        "color": 5
+      }
+    },
+    {
+      "id": "7f96ad4a-336d-46e8-9e1c-b4a383237470",
+      "name": "S3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        -400
+      ],
+      "parameters": {
+        "content": "## 3 · Supervisor AI-as-a-Judge\nToda respuesta pasa por el sub-workflow Juez antes de registrarse o enviarse. Rúbrica 1-5; exactitud_factual < 4 congela la autonomía.",
+        "height": 640,
+        "width": 760,
+        "color": 6
+      }
+    },
+    {
+      "id": "9b92c3de-74cc-4fad-a9f3-8e1fa1ebd26e",
+      "name": "S4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3010,
+        -400
+      ],
+      "parameters": {
+        "content": "## 4 · Human-in-the-loop y despacho\nAceptado → se despacha solo. Corregir / Rechazado → cola de aprobación humana por mail (botones Aprobar y enviar / Descartar; el flujo espera). Al cerrar: log y memoria de sesión actualizados.",
+        "height": 920,
+        "width": 1420,
+        "color": 4
+      }
+    },
+    {
+      "id": "f922bc13-04a8-4c43-9d16-16ea007a8e96",
+      "name": "S5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        260
+      ],
+      "parameters": {
+        "content": "## Ramas de error\nSi un worker o el Juez fallan (tras reintentos), se alerta al equipo y se registra en el log. Fallas no previstas → workflow de Alertas.",
+        "height": 300,
+        "width": 760,
+        "color": 3
+      }
+    }
+  ],
+  "connections": {
+    "Webhook: Recibir Solicitud": {
+      "main": [
+        [
+          {
+            "node": "Normalizar Solicitud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalizar Solicitud": {
+      "main": [
+        [
+          {
+            "node": "¿Consulta válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Consulta válida?": {
+      "main": [
+        [
+          {
+            "node": "Control de Duplicados (Log)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 400 (consulta vacía)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Control de Duplicados (Log)": {
+      "main": [
+        [
+          {
+            "node": "¿Solicitud duplicada?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Solicitud duplicada?": {
+      "main": [
+        [
+          {
+            "node": "Responder 200 (ya recibida)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 202 (recibido)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder 200 (ya recibida)": {
+      "main": [
+        [
+          {
+            "node": "Descartar Duplicado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder 202 (recibido)": {
+      "main": [
+        [
+          {
+            "node": "Registrar Recepción (Log)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar Recepción (Log)": {
+      "main": [
+        [
+          {
+            "node": "Buscar Memoria de Sesión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Memoria de Sesión": {
+      "main": [
+        [
+          {
+            "node": "Armar Contexto de Memoria",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar Contexto de Memoria": {
+      "main": [
+        [
+          {
+            "node": "Delegar a Worker Consulta (RAG + Catálogo)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delegar a Worker Consulta (RAG + Catálogo)": {
+      "main": [
+        [
+          {
+            "node": "Preparar Evaluación",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta de Falla (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Evaluación": {
+      "main": [
+        [
+          {
+            "node": "Supervisor: Juez de Calidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supervisor: Juez de Calidad": {
+      "main": [
+        [
+          {
+            "node": "Registrar Evaluación (Log)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Switch: Decisión del Supervisor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta de Falla (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch: Decisión del Supervisor": {
+      "main": [
+        [
+          {
+            "node": "Despachar Respuesta (Worker Despacho)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cola de Aprobación Humana (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cola de Aprobación Humana (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cola de Aprobación Humana (Gmail)": {
+      "main": [
+        [
+          {
+            "node": "¿Aprobada por el revisor?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Aprobada por el revisor?": {
+      "main": [
+        [
+          {
+            "node": "Marcar Aprobación Humana",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar Descarte (Log)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar Aprobación Humana": {
+      "main": [
+        [
+          {
+            "node": "Despachar Respuesta (Worker Despacho)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Despachar Respuesta (Worker Despacho)": {
+      "main": [
+        [
+          {
+            "node": "Cerrar Caso (Log)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Alerta de Falla (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cerrar Caso (Log)": {
+      "main": [
+        [
+          {
+            "node": "Actualizar Memoria de Sesión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerta de Falla (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Registrar Error (Log)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "9qQYWwygDIVlSPXd"
+  },
+  "id": "CEOjkrMAzgzmW1cP"
+}

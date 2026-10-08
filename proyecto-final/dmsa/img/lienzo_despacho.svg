@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="-100 -260 800 480" font-family="Inter, DejaVu Sans, sans-serif">
+<defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#d5d8de"/></pattern><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8a8f98"/></marker><marker id="me" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e03131"/></marker></defs>
+<rect x="-100" y="-260" width="800" height="480" fill="#f7f8fa"/><rect x="-100" y="-260" width="800" height="480" fill="url(#dots)"/>
+<rect x="-40" y="-200" width="680" height="160" rx="6" fill="#e3f3e0" stroke="#a9d6a2" stroke-width="1.5"/>
+<text x="-24" y="-166" font-size="22" font-weight="700" fill="#2b2b2b">Worker de Despacho</text>
+<text x="-24" y="-133" font-size="15" font-weight="400" fill="#2b2b2b">Único punto de salida hacia el usuario: solo recibe respuestas ya validadas (por</text>
+<text x="-24" y="-111" font-size="15" font-weight="400" fill="#2b2b2b">el Juez o por un revisor humano).</text>
+<path d="M100,50.0 C170.0,50.0 170.0,50.0 236,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M340,50.0 C410.0,50.0 410.0,50.0 476,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M40,0 L90,0 Q100,0 100,10 L100,90 Q100,100 90,100 L40,100 A40,50 0 0 1 40,0 z" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="100" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="50.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#5f3dc4">▶</text>
+<text x="50.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Recibir Resultado</text>
+<text x="50.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Validado</text>
+<rect x="240" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="340" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="240" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="290.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#c92a2a">✉</text>
+<text x="290.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Enviar Respuesta</text>
+<text x="290.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Validada (Gmail)</text>
+<rect x="480" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="580" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="480" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="530.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#4c6ef5">✎</text>
+<text x="530.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Contrato de Salida</text>
+</svg>

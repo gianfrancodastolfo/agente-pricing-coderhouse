@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>DMSA · Asistente de Inteligencia de Precios · D'Astolfo</title>
+<style>
+  :root { --navy:#1f3a68; --ink:#1d2330; --muted:#5d6676; --line:#d9dee7; --soft:#f4f6fa;
+          --blue:#2f5ea8; --green:#2e7d32; --amber:#a8761b; --red:#a33a3a; --purple:#5b3f99; }
+  @page { size: A4; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; background:#fff; }
+  body { font-family: Inter, "DejaVu Sans", sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.5; }
+  h1, h2, h3, h4 { color: var(--navy); line-height: 1.25; margin: 0; }
+  h1.sec { font-size: 21pt; margin: 0 0 4mm; padding-top: 1mm; }
+  .sec-kicker { font-size: 9pt; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); margin-bottom: 1mm; }
+  h2 { font-size: 13.5pt; margin: 6mm 0 2.5mm; }
+  h3 { font-size: 11pt; margin: 4mm 0 2mm; color: var(--ink); }
+  p { margin: 0 0 2.6mm; }
+  .lead { font-size: 11pt; color: #2b3343; }
+  .page-break { break-before: page; }
+  .avoid { break-inside: avoid; }
+  ul { margin: 0 0 3mm; padding-left: 5mm; } li { margin-bottom: 1.2mm; }
+  table { width: 100%; border-collapse: collapse; margin: 1.5mm 0 4mm; font-size: 9.1pt; break-inside: auto; }
+  tr { break-inside: avoid; }
+  th { background: var(--navy); color: #fff; text-align: left; font-weight: 600; padding: 2mm 2.4mm; }
+  td { border-bottom: 1px solid var(--line); padding: 1.8mm 2.4mm; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafbfd; }
+  td.n, th.n { text-align: right; white-space: nowrap; }
+  tr.total td { font-weight: 700; background: #eef2f9 !important; }
+  code, .mono { font-family: "DejaVu Sans Mono", monospace; font-size: 8.4pt; }
+  pre { font-family: "DejaVu Sans Mono", monospace; font-size: 8pt; line-height: 1.38; background: #0f1b2d; color: #e7edf7;
+        padding: 3mm 3.5mm; border-radius: 2mm; white-space: pre-wrap; word-break: break-word; margin: 1.5mm 0 3mm; break-inside: avoid; }
+  figure { margin: 2mm 0 4mm; break-inside: avoid; }
+  figure img { width: 100%; display: block; border: 1px solid var(--line); border-radius: 1.5mm; }
+  figcaption { font-size: 8.4pt; color: var(--muted); margin-top: 1.5mm; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .box { border: 1px solid var(--line); border-left: 4px solid var(--blue); background: var(--soft); padding: 3mm 4mm; border-radius: 1.5mm; margin: 2mm 0 4mm; break-inside: avoid; }
+  .box.green { border-left-color: var(--green); background: #f1f8ef; }
+  .box.amber { border-left-color: var(--amber); background: #fdf7ea; }
+  .box.red { border-left-color: var(--red); background: #fbf0f0; }
+  .box h4 { font-size: 10pt; margin-bottom: 1.2mm; color: var(--ink); }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .pend { border: 1.5px dashed #c99a1c; background: #fff8e1; color: #6b4e00; padding: 3mm 4mm; border-radius: 1.5mm; margin: 2mm 0 4mm; font-size: 9.4pt; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin: 3mm 0 4mm; }
+  .kpi { border: 1px solid var(--line); border-radius: 2mm; padding: 3mm 3.5mm; background: #fff; break-inside: avoid; }
+  .kpi .v { font-size: 17pt; font-weight: 700; color: var(--navy); line-height: 1.1; }
+  .kpi .l { font-size: 8.6pt; color: var(--muted); margin-top: 1mm; }
+  .tag { display: inline-block; font-size: 7.8pt; font-weight: 700; padding: .4mm 1.8mm; border-radius: 3mm; }
+  .t-ok { background: #e3f0dc; color: var(--green); } .t-warn { background: #fbefd5; color: var(--amber); } .t-bad { background: #f6e0e0; color: var(--red); }
+  .muted { color: var(--muted); } .small { font-size: 8.6pt; }
+  /* Portada */
+  .cover { height: 263mm; display: flex; flex-direction: column; }
+  .cover .band { background: var(--navy); color: #fff; border-radius: 3mm; padding: 14mm 12mm 12mm; }
+  .cover .band .k { font-size: 9.5pt; letter-spacing: .16em; text-transform: uppercase; opacity: .8; font-weight: 600; }
+  .cover .band h1 { color: #fff; font-size: 30pt; margin: 4mm 0 3mm; }
+  .cover .band .sub { font-size: 13pt; opacity: .92; max-width: 150mm; }
+  .cover .meta { margin-top: 9mm; display: grid; grid-template-columns: 38mm 1fr; row-gap: 2.4mm; font-size: 10.5pt; }
+  .cover .meta div:nth-child(odd) { color: var(--muted); }
+  .cover .toc { margin-top: 10mm; border-top: 1px solid var(--line); padding-top: 5mm; }
+  .cover .toc div { display: flex; gap: 4mm; padding: 1.6mm 0; font-size: 10.5pt; }
+  .cover .toc b { color: var(--navy); width: 8mm; }
+  .cover .foot { margin-top: auto; }
+  .json-ok { color: #9ee493; }
+</style>
+</head>
+<body>
+
+{% macro pendiente(texto) -%}
+<div class="pend"><b>PENDIENTE DE LA CORRIDA REAL.</b> {{ texto }}</div>
+{%- endmacro %}
+
+<!-- ===================== PORTADA ===================== -->
+<section class="cover">
+  <div class="band">
+    <div class="k">Documentación Maestra del Sistema Agéntico · DMSA</div>
+    <h1>Asistente de Inteligencia de Precios</h1>
+    <div class="sub">Sistema agéntico asincrónico y supervisado que responde consultas de precios, stock y políticas comerciales con control de calidad automático y aprobación humana para los casos dudosos.</div>
+  </div>
+  <div class="meta">
+    <div>Autor</div><div><b>Gianfranco D'Astolfo</b></div>
+    <div>Curso</div><div>AI Automation Avanzado (Automatización con IA) · CoderHouse</div>
+    <div>Cohorte</div><div>2026</div>
+    <div>Entrega</div><div>Proyecto Final Integrador: despliegue y defensa de la solución agéntica</div>
+    <div>Dirigido a</div><div>Comité de Innovación (C-Suite) · vertical Sales Ops &amp; Customer Success</div>
+    <div>Plataforma</div><div>n8n Community 2.38 (autoalojado) · Google Sheets · Gmail · Telegram · Gemini (tier gratuito en el prototipo)</div>
+    <div>Fecha</div><div>{{ d.fecha_documento }}</div>
+  </div>
+  <div class="toc">
+    <div><b>1</b><span>Portada y resumen ejecutivo: el problema de negocio y la propuesta</span></div>
+    <div><b>2</b><span>Arquitectura en n8n: lienzos, módulos, flujo de datos, memoria y gobernanza</span></div>
+    <div><b>3</b><span>Auditoría y rúbricas: el supervisor AI-as-a-Judge y sus resultados reales</span></div>
+    <div><b>4</b><span>Justificación financiera: costo en tokens, horas evitadas, TCO y ROI</span></div>
+    <div><b>A</b><span>Anexos: repositorio y correcciones respecto de las pre-entregas</span></div>
+  </div>
+  <div class="foot box">
+    <h4>Nota de seguridad</h4>
+    <p>Este documento no contiene claves de API, tokens ni contraseñas. Las credenciales se mencionan solo por su nombre en el gestor cifrado de n8n, y los identificadores de planillas aparecen abreviados.</p>
+  </div>
+</section>
+
+<!-- ===================== 1. RESUMEN EJECUTIVO ===================== -->
+<section class="page-break">
+  <div class="sec-kicker">Sección 1</div>
+  <h1 class="sec">Resumen ejecutivo</h1>
+
+  <h2>El problema</h2>
+  <p class="lead">Hoy cada consulta sobre precios, stock, márgenes o descuentos la resuelve una persona a mano: busca en la planilla, revisa la política vigente y redacta la respuesta.</p>
+  <p>Con un volumen de referencia de <b>{{ r.p.consultas_mes }} consultas por mes</b> a <b>{{ r.p.minutos_por_consulta }} minutos</b> cada una, el equipo dedica <b>{{ r.horas_manual|num }} horas al mes</b> a una tarea repetitiva, unos <b>USD {{ r.actual.manual|num }} por mes</b> a un costo de referencia de USD {{ r.p.costo_hora_usd }} por hora. A ese costo visible se suman tres costos ocultos:</p>
+  <ul>
+    <li><b>Espera.</b> Cada consulta queda en cola hasta que alguien está libre; fuera de horario, se responde al día siguiente.</li>
+    <li><b>Riesgo.</b> Un precio desactualizado o un descuento fuera de política se traduce en margen perdido o en un reclamo.</li>
+    <li><b>Opacidad.</b> No queda registro de qué se respondió, con qué fuente ni quién lo autorizó.</li>
+  </ul>
+
+  <h2>La solución</h2>
+  <p>Un asistente que trabaja en segundo plano y que nunca envía nada sin control:</p>
+  <ol style="margin:0 0 3mm;padding-left:5mm">
+    <li><b>Acusa recibo al instante</b> con un código de seguimiento; quien consulta no queda esperando.</li>
+    <li><b>Busca en las fuentes vigentes</b> (catálogo y política de precios) y <b>cita de dónde sale</b> cada dato; si la información no existe, responde «No sé» en lugar de inventar.</li>
+    <li><b>Un supervisor automático califica la respuesta</b> antes de que salga, con una rúbrica fija de cuatro criterios.</li>
+    <li><b>Si la nota no alcanza el umbral, la autonomía se congela</b>: el caso pasa a una persona, que lo aprueba o lo descarta con un clic.</li>
+    <li><b>La respuesta validada se envía por mail</b> y cada paso queda registrado con un código único.</li>
+  </ol>
+
+  <h2>Resultados principales</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">{% if d.tiempos %}{{ d.tiempos.acuse_texto }}{% else %}&lt; 1 s*{% endif %}</div><div class="l">Acuse de recibo al consultante (respuesta 202 con código de seguimiento){% if not d.tiempos %}. *Objetivo de diseño, se mide en la corrida real{% endif %}</div></div>
+    <div class="kpi"><div class="v">{{ r.actual.h_evitadas|num }} h/mes</div><div class="l">Horas de analista liberadas al volumen actual ({{ (1 - r.p.tasa_derivacion)|pct }} de resolución autónoma)</div></div>
+    <div class="kpi"><div class="v">USD {{ r.actual.ahorro|num }}</div><div class="l">Ahorro neto mensual frente al proceso manual (USD {{ r.ahorro_anual|num }} por año)</div></div>
+    <div class="kpi"><div class="v">{{ r.payback|num(1) }} meses</div><div class="l">Recupero de la inversión inicial de USD {{ r.p.inversion_usd }}; ROI a 12 meses ≈ {{ r.roi12|pct }}</div></div>
+    <div class="kpi"><div class="v">USD {{ r.modelos[0].por_mes|num(2) }}</div><div class="l">Costo mensual estimado de IA a precio de lista pago (hoy USD 0, tier gratuito)</div></div>
+    <div class="kpi"><div class="v">100%</div><div class="l">De las respuestas pasan por el supervisor antes de salir; las dudosas, además, por una persona</div></div>
+  </div>
+
+  <div class="box green">
+    <h4>Decisión que se solicita al comité</h4>
+    <p>Aprobar un <b>piloto controlado de 30 días</b> (un canal, un equipo) con dos condiciones: (1) migrar el modelo de lenguaje al tier pago de Google, a Vertex AI o a Claude <b>antes</b> de procesar datos reales, por privacidad (ver 2.7); y (2) medir desde el primer día la <b>tasa de resolución autónoma</b>, con una meta de 75% o más para pasar a operación plena.</p>
+  </div>
+</section>
+
+<!-- ===================== 2. ARQUITECTURA ===================== -->
+<section class="page-break">
+  <div class="sec-kicker">Sección 2</div>
+  <h1 class="sec">Arquitectura del sistema en n8n</h1>
+  <p class="lead">El sistema sigue el patrón <b>Manager-Worker</b>: un orquestador coordina y delega; cada especialista hace una sola tarea y devuelve un resultado con formato fijo. No hay un flujo monolítico: si una pieza falla, se reemplaza o se reintenta sin tocar las demás.</p>
+
+  <h2>2.1 Mapa general</h2>
+  <figure style="width:88%;margin-left:auto;margin-right:auto">
+    <img src="img/arquitectura.svg" alt="Arquitectura del sistema">
+    <figcaption>Figura 1. Recorrido de una consulta: recepción asincrónica → memoria → Worker de consulta → Juez de Calidad → decisión por umbral → despacho automático o cola humana. Abajo, la capa de persistencia; a la derecha, el modelo de lenguaje y el workflow independiente de alertas.</figcaption>
+  </figure>
+
+  <table class="small">
+    <tr><th style="width:24%">Pieza</th><th style="width:38%">Qué hace</th><th>Qué gana el negocio</th></tr>
+    <tr><td><b>Recepción</b></td><td>Valida la solicitud, descarta duplicados y responde 202 con un código de seguimiento</td><td>Nadie queda esperando y ninguna solicitud se procesa dos veces</td></tr>
+    <tr><td><b>Memoria</b></td><td>Recupera el resumen y el estado de las consultas anteriores del mismo cliente</td><td>No hay que repetir información ya dada</td></tr>
+    <tr><td><b>Worker de Consulta</b></td><td>Busca en la base de conocimiento y en el catálogo; cita la fuente o dice «No sé»</td><td>Información vigente y verificable, sin inventar</td></tr>
+    <tr><td><b>Juez de Calidad</b></td><td>Puntúa la respuesta en cuatro criterios, en formato JSON</td><td>Ninguna respuesta sale sin control de calidad</td></tr>
+    <tr><td><b>Decisión por umbral</b></td><td>Aplica una regla fija sobre las notas del Juez</td><td>La autonomía la define una política explícita y auditable, no la IA</td></tr>
+    <tr><td><b>Cola humana</b></td><td>Envía el caso dudoso por mail con «Aprobar y enviar» / «Descartar» y espera</td><td>El criterio humano se reserva para lo que lo necesita</td></tr>
+    <tr><td><b>Worker de Despacho</b></td><td>Único punto de salida hacia el usuario (Gmail)</td><td>Un solo lugar donde controlar lo que sale de la empresa</td></tr>
+    <tr><td><b>Alertas</b></td><td>Avisa por Telegram ante cualquier falla y la registra</td><td>Ninguna falla pasa en silencio</td></tr>
+  </table>
+</section>
+
+<section class="page-break">
+  <h2>2.2 Lienzo del orquestador (Manager)</h2>
+  <p>El workflow «PF - Manager Orquestador Asincrónico» tiene {{ nodos_manager[0] }} nodos organizados en {{ nodos_manager[1] }} bloques con notas de color, que se leen de izquierda a derecha: <b>gris</b>, recepción e idempotencia; <b>azul</b>, memoria y Worker; <b>violeta</b>, supervisor; <b>verde</b>, aprobación humana y despacho; <b>rojo</b>, ramas de error. Las líneas rojas son salidas de error y el símbolo ↻ indica reintentos automáticos. Los lienzos se generaron a partir de la exportación JSON de cada workflow (mismas posiciones, nombres, notas y conexiones que en n8n); los JSON están en el repositorio (Anexo A).</p>
+  <figure>
+    <img src="img/lienzo_manager.svg" alt="Lienzo completo del Manager">
+    <figcaption>Figura 2. Lienzo completo del Manager.</figcaption>
+  </figure>
+  <figure>
+    <img src="img/lienzo_manager_parte1.svg" alt="Bloques 1 y 2">
+    <figcaption>Figura 3. Bloques 1 y 2. El webhook valida la solicitud (si viene vacía, 400), busca el requestId en el log (si ya existe, 200 «duplicado») y, si es nueva, responde 202 y sigue en segundo plano: registra la recepción, recupera la memoria de la sesión y delega en el Worker de Consulta (hasta 3 intentos).</figcaption>
+  </figure>
+  <figure>
+    <img src="img/lienzo_manager_parte2.svg" alt="Bloques 3, 4 y errores">
+    <figcaption>Figura 4. Bloques 3 y 4 y ramas de error. La respuesta pasa obligatoriamente por el sub-workflow Juez; la evaluación se registra en el log y un Switch la deriva al despacho automático (Aceptado) o a la cola humana por mail (Corregir o Rechazado). Si el revisor aprueba, se despacha; si descarta, se registra el descarte. Al cerrar el caso se actualizan el log y la memoria de la sesión.</figcaption>
+  </figure>
+</section>
+
+<section class="page-break">
+  <h2>2.3 Los especialistas (sub-workflows)</h2>
+  <table>
+    <tr><th style="width:27%">Workflow</th><th style="width:25%">Rol</th><th style="width:24%">Recibe</th><th>Devuelve</th></tr>
+    <tr><td><b>Worker 1 - Consulta de Datos</b><br><span class="small muted">reutilizado de los Módulos 2 y 5</span></td><td>Agente con dos herramientas: base de conocimiento (RAG) y catálogo en Sheets; solo lectura</td><td><code>consulta</code>, <code>memoria_contexto</code></td><td><code>{status, data}</code> con la respuesta y la cita de la fuente</td></tr>
+    <tr><td><b>PF - Juez de Calidad (Supervisor)</b></td><td>AI-as-a-Judge con salida estructurada y regla de umbral</td><td><code>consulta</code>, <code>respuesta</code> e identificadores</td><td><code>evaluacion</code> (notas, cita_fuente, veredicto, razón), <code>decision</code>, <code>motivos_umbral</code></td></tr>
+    <tr><td><b>PF - Worker Despacho (Notificación)</b></td><td>Único canal de salida (Gmail)</td><td>Resultado ya validado</td><td><code>status</code>, <code>canal_entrega</code>, <code>messageId</code></td></tr>
+    <tr><td><b>PF - Alertas de Error</b></td><td>Error workflow del Manager</td><td>Evento de error de n8n</td><td>Aviso por Telegram con workflow, último nodo y error</td></tr>
+  </table>
+  <div class="grid2">
+    <figure>
+      <img src="img/lienzo_juez.svg" alt="Juez de Calidad">
+      <figcaption>Figura 5. Juez de Calidad: agente evaluador (Gemini, temperatura 0, 3 intentos) con parser de rúbrica JSON Schema, seguido de la regla de umbral en código.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/worker1_lienzo_m5.png" alt="Worker 1">
+      <figcaption>Figura 6. Worker 1 - Consulta de Datos (captura de n8n, Módulo 5): rama de ingesta de la base de conocimiento arriba; abajo, el agente con las herramientas de catálogo y de recuperación de documentos.</figcaption>
+    </figure>
+  </div>
+  <div class="grid2">
+    <figure>
+      <img src="img/lienzo_despacho.svg" alt="Worker Despacho">
+      <figcaption>Figura 7. Worker Despacho: envío por Gmail y contrato de salida.</figcaption>
+    </figure>
+    <figure>
+      <img src="img/lienzo_alertas.svg" alt="Alertas">
+      <figcaption>Figura 8. Alertas de Error: Error Trigger y aviso al equipo por Telegram.</figcaption>
+    </figure>
+  </div>
+
+  <h2>2.4 Flujo de datos y correlación con traceId</h2>
+  <p>Cada solicitud lleva dos identificadores que la acompañan de punta a punta. Con ellos se puede reconstruir qué pasó en cualquier caso: qué entró, qué respondió el agente, cómo lo calificó el Juez, quién lo aprobó y cuándo salió.</p>
+  <table>
+    <tr><th style="width:18%">Campo</th><th style="width:40%">Dónde se crea</th><th>Para qué sirve</th></tr>
+    <tr><td><code>requestId</code></td><td>Lo envía el sistema que consulta (o el encabezado <code>Idempotency-Key</code>); si falta, se deriva de la sesión, la consulta y la hora</td><td>Clave de idempotencia: una sola fila en el log y un solo envío por solicitud</td></tr>
+    <tr><td><code>traceId</code></td><td>Recepción: <code>trc-&lt;id de ejecución&gt;-&lt;marca de tiempo&gt;</code></td><td>Correlaciona la ejecución del Manager, los sub-workflows, la fila del log y el mail enviado</td></tr>
+    <tr><td><code>sessionId</code></td><td>Lo envía quien consulta</td><td>Clave de la memoria de largo plazo de ese cliente o vendedor</td></tr>
+    <tr><td><code>evaluacion</code></td><td>Juez de Calidad</td><td>Notas, veredicto y razón; se guarda como JSON en el log (<code>evaluacion_json</code>)</td></tr>
+  </table>
+  <div class="grid2 avoid">
+    <div><h3>Solicitud de entrada</h3>
+<pre>POST /webhook/agente-pricing
+Content-Type: application/json
+{
+ "requestId": "PF-TEST-001",
+ "sessionId": "demo-ventas-01",
+ "canal": "webhook",
+ "consulta": "¿Cuál es el precio oferta y el
+   stock del Smartwatch FitPulse 3
+   (SKU ELEC-002)?"
+}</pre></div>
+    <div><h3>Acuse inmediato (HTTP 202)</h3>
+<pre>{
+ "estado": "recibido",
+ "mensaje": "Solicitud recibida. Se procesa
+   en segundo plano; la respuesta
+   validada llega por mail.",
+ "requestId": "PF-TEST-001",
+ "traceId": "trc-&lt;ejecución&gt;-&lt;timestamp&gt;"
+}</pre>
+    <p class="small muted">Otras respuestas posibles: <b>200</b> «duplicado» (el requestId ya existe; no se reprocesa) y <b>400</b> «rechazado» (falta la consulta).</p></div>
+  </div>
+  <p>Cada sub-workflow recibe solo los campos que necesita (contrato de datos mínimo): el Juez no ve la memoria ni el catálogo, solo la consulta y la respuesta propuesta. Así se reduce el costo en tokens y se evita que el evaluador se contamine con el contexto del agente.</p>
+</section>
+
+<section>
+  <h2>2.5 Memoria persistente de largo plazo y acople contextual</h2>
+  <p>La memoria vive en la planilla <b>memoria_sesiones</b>, con una fila por <code>Session_ID</code>. Al recibir una consulta, el Manager busca la fila de esa sesión y arma un bloque de contexto entre delimitadores rígidos, que se inyecta en las instrucciones del Worker:</p>
+<pre>[INICIO DE CONTEXTO COMPARTIDO]
+Estado del caso: Resuelto. Resumen de la última interacción: Última consulta: ¿Cuál es el
+precio oferta y el stock...? | Respuesta validada (Aceptado) enviada por mail.
+[FIN DEL CONTEXTO COMPARTIDO]</pre>
+  <ul>
+    <li><b>Acople contextual:</b> el agente sabe qué se habló antes con ese cliente sin recibir la conversación completa; solo un resumen corto.</li>
+    <li><b>Blindaje:</b> los delimitadores marcan ese texto como contexto y no como instrucciones, una defensa contra la inyección de órdenes a través de datos guardados.</li>
+    <li><b>Escritura idempotente:</b> al cerrar el caso se actualiza la misma fila (buscar por Session_ID y actualizar, o crearla si no existe) con el resumen, el estado y datos clave en JSON (último requestId y último puntaje). Nunca se guardan transcripciones completas.</li>
+    <li><b>Memoria de auditoría:</b> el log <b>log_trazabilidad_agente</b> conserva, por cada solicitud, la consulta, la respuesta, la rúbrica del Juez, la decisión, la revisión humana y las fechas.</li>
+  </ul>
+  {% if d.memoria_ejemplo %}
+  <h3>Evidencia: memoria actualizada tras las pruebas</h3>
+  <table>
+    <tr><th>Session_ID</th><th>Fecha_Actualizacion</th><th>Resumen_Consolidado</th><th>Estado</th><th>Datos_Clave</th></tr>
+    <tr><td><code>{{ d.memoria_ejemplo.Session_ID }}</code></td><td class="small">{{ d.memoria_ejemplo.Fecha_Actualizacion }}</td><td class="small">{{ d.memoria_ejemplo.Resumen_Consolidado }}</td><td>{{ d.memoria_ejemplo.Estado_del_Caso }}</td><td class="small"><code>{{ d.memoria_ejemplo.Datos_Clave }}</code></td></tr>
+  </table>
+  {% else %}{{ pendiente('Fila real de memoria_sesiones de la sesión demo-ventas-01 después de las pruebas.') }}{% endif %}
+
+  <h2>2.6 Robustez: asincronía, idempotencia, reintentos y errores</h2>
+  <table>
+    <tr><th style="width:26%">Riesgo</th><th style="width:40%">Control implementado</th><th>Resultado para el negocio</th></tr>
+    <tr><td>El sistema de origen reenvía la misma solicitud</td><td>Se busca el <code>requestId</code> en el log antes de procesar; si existe, responde 200 «duplicado»</td><td>Sin registros ni mails duplicados</td></tr>
+    <tr><td>Solicitud incompleta</td><td>Validación inicial; responde 400 sin consumir IA</td><td>Cero costo en solicitudes inválidas</td></tr>
+    <tr><td>Caída momentánea del modelo o de Google</td><td>Reintentos automáticos: Worker hasta 3 intentos y Juez 2 en el Manager (más 3 internos), con 5 s de espera</td><td>Las fallas breves se absorben sin intervención</td></tr>
+    <tr><td>Falla persistente de un Worker, del Juez o del despacho</td><td>Salida de error: aviso por Telegram con código y error, y registro <code>error_alertado</code> en el log</td><td>El equipo se entera en el momento y sabe qué caso atender</td></tr>
+    <tr><td>Falla no prevista (credencial vencida, planilla inaccesible)</td><td>Workflow independiente «PF - Alertas de Error», asignado como error workflow del Manager</td><td>Ninguna falla queda en silencio (ver evidencia real abajo)</td></tr>
+    <tr><td>Respuesta dudosa o incorrecta</td><td>Juez + umbral; cola humana con aprobación explícita</td><td>Ningún error de la IA llega al cliente sin una persona que lo autorice</td></tr>
+    <tr><td>Instrucciones maliciosas dentro de la consulta</td><td>Delimitadores de contexto y Juez instruido a tratar consulta y respuesta como datos</td><td>Menor superficie de manipulación</td></tr>
+  </table>
+  <div class="box red">
+    <h4>Evidencia real: la rama de error disparada por una falla verdadera (ejecuciones 41, 42 y 43)</h4>
+    <p>Durante las pruebas venció la autorización de Google. La solicitud falló en el control de duplicados, el workflow de Alertas se disparó solo y llegó este aviso a Telegram:</p>
+    <p class="mono" style="margin:0">⚠️ Falla en el Sistema Agéntico de Pricing — Workflow: PF - Manager Orquestador Asincrónico — Último nodo: Control de Duplicados (Log) — Error: The credential "Google Sheets account" needs to be reconnected</p>
+  </div>
+</section>
+
+<section class="page-break">
+  <h2>2.7 Gobernanza de datos y parámetros de conexión</h2>
+  <h3>Credenciales (solo nombres; los valores viven cifrados en n8n)</h3>
+  <table>
+    <tr><th>Nombre en n8n</th><th>Tipo</th><th>Uso</th><th>Permiso mínimo</th></tr>
+    <tr><td>Google Sheets account</td><td>OAuth2</td><td>Log, memoria y catálogo</td><td>Lectura del catálogo; escritura solo en log y memoria</td></tr>
+    <tr><td>Gmail account</td><td>OAuth2</td><td>Despacho y cola de aprobación</td><td>Envío</td></tr>
+    <tr><td>Gemini Free</td><td>API key</td><td>Worker, Juez y embeddings</td><td>Uso del modelo</td></tr>
+    <tr><td>Telegram account</td><td>Token de bot</td><td>Alertas de error</td><td>Envío a un único chat del equipo</td></tr>
+  </table>
+  <h3>Variables de entorno de la instancia</h3>
+  <table>
+    <tr><th style="width:27%">Variable</th><th style="width:37%">Propósito</th><th>Prototipo → producción</th></tr>
+    <tr><td><code>N8N_HOST</code>, <code>N8N_PORT</code>, <code>N8N_PROTOCOL</code></td><td>Dirección de la instancia</td><td>localhost:5678 por http → dominio propio por https</td></tr>
+    <tr><td><code>WEBHOOK_URL</code></td><td>URL pública de los webhooks y de los botones de aprobación</td><td>Sin definir (local) → obligatoria en producción</td></tr>
+    <tr><td><code>N8N_ENCRYPTION_KEY</code></td><td>Clave con la que n8n cifra las credenciales guardadas</td><td>Generada por n8n → definida y resguardada en un gestor de secretos; nunca en texto</td></tr>
+    <tr><td><code>GENERIC_TIMEZONE</code></td><td>Zona horaria de fechas y registros</td><td>Por defecto → America/Argentina/Buenos_Aires</td></tr>
+    <tr><td><code>EXECUTIONS_DATA_PRUNE</code>, <code>EXECUTIONS_DATA_MAX_AGE</code></td><td>Retención del historial de ejecuciones, que contiene datos de consultas</td><td>Por defecto → poda activa con plazo definido por la política de datos</td></tr>
+  </table>
+  <h3>Parámetros de conexión</h3>
+  <table>
+    <tr><th style="width:27%">Parámetro</th><th>Valor</th></tr>
+    <tr><td>Endpoint</td><td><code>POST {base}/webhook/agente-pricing</code>, cuerpo JSON: <code>requestId</code>, <code>sessionId</code>, <code>canal</code>, <code>consulta</code> (obligatoria)</td></tr>
+    <tr><td>Respuestas</td><td>202 recibido · 200 duplicado · 400 consulta vacía</td></tr>
+    <tr><td>Log de trazabilidad</td><td>Google Sheets «log_trazabilidad_agente» (ID 1noQt2…OarukI)</td></tr>
+    <tr><td>Memoria de sesiones</td><td>Google Sheets «memoria_sesiones», pestaña memoria_sesiones.csv (ID 1-npep…JlcMMRBhI)</td></tr>
+    <tr><td>Catálogo</td><td>Google Sheets «catalogo_pricing_completo»: 203 productos × 37 columnas (ID 1bo8Z…aY9G580)</td></tr>
+    <tr><td>Base de conocimiento</td><td>Vector store de n8n (clave <code>rag_agente_pricing</code>), embeddings <code>gemini-embedding-001</code>, 4 fragmentos por consulta con el metadato <code>fuente</code></td></tr>
+    <tr><td>Modelo de lenguaje</td><td><code>models/gemini-3-flash-preview</code> en Worker y Juez; temperatura 0 en el Juez</td></tr>
+  </table>
+  <h3>Estructura de tablas</h3>
+  <table class="small">
+    <tr><th style="width:28%">log_trazabilidad_agente</th><th>Contenido</th></tr>
+    <tr><td><code>requestId</code>, <code>traceId</code></td><td>Identificadores de idempotencia y correlación (texto)</td></tr>
+    <tr><td><code>fecha_recepcion</code>, <code>fecha_cierre</code></td><td>Fecha y hora ISO 8601 de entrada y de cierre</td></tr>
+    <tr><td><code>sessionId</code>, <code>canal</code>, <code>consulta</code></td><td>Origen y texto de la consulta</td></tr>
+    <tr><td><code>worker</code>, <code>respuesta</code></td><td>Especialista que respondió y respuesta propuesta</td></tr>
+    <tr><td><code>exactitud_factual</code>, <code>cobertura_consulta</code>, <code>tono_profesional</code>, <code>ausencia_alucinaciones</code>, <code>puntaje_global</code></td><td>Notas del Juez (1 a 5) y promedio</td></tr>
+    <tr><td><code>veredicto_juez</code>, <code>razon_juez</code>, <code>decision</code>, <code>evaluacion_json</code></td><td>Veredicto de la IA, su justificación, decisión final por umbral y la evaluación completa en JSON</td></tr>
+    <tr><td><code>estado</code>, <code>revision_humana</code></td><td>en_proceso → aprobado_automatico / en_revision_humana → despachado_automatico / despachado_tras_revision / descartado_por_revisor / error_alertado; y resultado de la revisión</td></tr>
+  </table>
+  <table class="small">
+    <tr><th style="width:28%">memoria_sesiones</th><th>Contenido</th></tr>
+    <tr><td><code>Session_ID</code></td><td>Clave de búsqueda (texto)</td></tr>
+    <tr><td><code>Fecha_Actualizacion</code></td><td>Última escritura (ISO 8601)</td></tr>
+    <tr><td><code>Resumen_Consolidado</code>, <code>Estado_del_Caso</code></td><td>Resumen corto de la última interacción y estado (Nuevo / En progreso / Resuelto)</td></tr>
+    <tr><td><code>Datos_Clave</code></td><td>JSON con metadatos mínimos (último requestId, último puntaje)</td></tr>
+  </table>
+  <div class="box amber">
+    <h4>Privacidad: condición para operar con datos reales</h4>
+    <p>El prototipo usa el <b>tier gratuito</b> de la API de Gemini, cuyo contenido puede usarse para mejorar los productos de Google. Por eso no debe procesar datos reales de clientes ni de precios. Antes del piloto hay que migrar al tier pago, a Vertex AI o a la API comercial de Claude, que no entrenan con los datos del cliente por defecto. El cambio es de una credencial y un nodo; no afecta la arquitectura.</p>
+  </div>
+  <p class="small"><b>Mínimo privilegio:</b> el Worker es de solo lectura y no envía comunicaciones; el Despacho es el único que escribe hacia afuera; el Juez evalúa pero no reescribe; ninguna clave aparece en prompts ni en textos de los nodos.</p>
+</section>
+
+<!-- ===================== 3. AUDITORÍA ===================== -->
+<section class="page-break">
+  <div class="sec-kicker">Sección 3</div>
+  <h1 class="sec">Reporte de auditoría y rúbricas</h1>
+  <p class="lead"><b>La IA puntúa, la regla decide.</b> El supervisor (AI-as-a-Judge) es un sub-workflow independiente que recibe solo la consulta original y la respuesta propuesta, y devuelve una evaluación en JSON validada contra un esquema fijo. La decisión de enviar o no la toma después una regla determinística, escrita en código y auditable.</p>
+
+  <h2>3.1 Cómo funciona el supervisor</h2>
+  <table>
+    <tr><th style="width:25%">Criterio (1 a 5)</th><th>Qué mide</th></tr>
+    <tr><td><code>exactitud_factual</code></td><td>Que precios, porcentajes, stock y reglas sean concretos, coherentes entre sí y consistentes con la fuente citada. Cifras sin respaldo o contradicciones: 3 o menos.</td></tr>
+    <tr><td><code>cobertura_consulta</code></td><td>Que responda exactamente lo que se preguntó, sin desviarse ni dejar partes sin contestar.</td></tr>
+    <tr><td><code>tono_profesional</code></td><td>Claro, breve y adecuado para un equipo comercial.</td></tr>
+    <tr><td><code>ausencia_alucinaciones</code></td><td>Sin información inventada. Decir «No sé» cuando el dato no está en la base es el comportamiento correcto y recibe 5.</td></tr>
+    <tr><td><code>cita_fuente</code> (sí/no)</td><td>Si indica de qué documento o planilla sale la información, o declara que no la tiene.</td></tr>
+  </table>
+  <div class="grid2 avoid">
+    <div>
+      <h3>Umbrales configurados</h3>
+      <table>
+        <tr><th>Condición</th><th>Decisión</th></tr>
+        <tr><td>exactitud ≥ 4, resto ≥ 3 y veredicto del Juez «Aceptado»</td><td><span class="tag t-ok">Aceptado</span> se envía solo</td></tr>
+        <tr><td>exactitud &lt; 4, algún criterio &lt; 3 o veredicto «Corregir»</td><td><span class="tag t-warn">Corregir</span> autonomía congelada → persona</td></tr>
+        <tr><td>Veredicto «Rechazado», exactitud ≤ 2 o alucinaciones ≤ 2</td><td><span class="tag t-bad">Rechazado</span> autonomía congelada → persona</td></tr>
+        <tr><td>El Juez no devuelve un JSON válido</td><td><span class="tag t-warn">Corregir</span> falla segura</td></tr>
+      </table>
+      <p class="small">Modelo evaluador: Gemini con temperatura 0, para que la misma respuesta reciba la misma nota. Además se le indica ignorar cualquier instrucción que aparezca dentro de la consulta o de la respuesta.</p>
+    </div>
+    <div>
+      <h3>Rúbrica JSON Schema (salida obligatoria)</h3>
+<pre>{{ schema }}</pre>
+    </div>
+  </div>
+
+  <h2>3.2 Verificación de la regla de umbral</h2>
+  <p>Se ejecutó el código real del nodo «Aplicar Umbral de Autonomía» contra nueve evaluaciones de prueba que cubren cada frontera de la política. <b>Las nueve decisiones coinciden con la política definida.</b></p>
+  <table class="small">
+    <tr><th style="width:38%">Caso de prueba</th><th>Decisión</th><th class="n">Puntaje</th><th>Motivo registrado</th></tr>
+    {% for u in umbral %}
+    <tr><td>{{ u.caso }}</td><td><span class="tag {{ 't-ok' if u.decision == 'Aceptado' else ('t-bad' if u.decision == 'Rechazado' else 't-warn') }}">{{ u.decision }}</span></td><td class="n">{{ u.puntaje_global|num(2) }}</td><td>{{ u.motivos }}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section>
+  <h2>3.3 Pruebas de punta a punta contra el webhook de producción</h2>
+  {% if d.pruebas_completas %}
+  <p>Corrida del {{ d.fecha_pruebas }}: seis solicitudes reales contra <code>/webhook/agente-pricing</code>, con el sistema publicado.</p>
+  <table class="small">
+    <tr><th>#</th><th style="width:30%">Escenario</th><th>Esperado</th><th class="n">HTTP · tiempo</th><th>Juez → decisión</th><th>Resultado final</th><th></th></tr>
+    {% for t in d.pruebas %}
+    <tr><td>{{ t.n }}</td><td>{{ t.escenario }}</td><td>{{ t.esperado }}</td><td class="n">{{ t.http }} · {{ t.tiempo }}</td><td>{{ t.decision or '—' }}</td><td>{{ t.resultado }}</td><td>{% if t.ok %}<span class="tag t-ok">OK</span>{% else %}<span class="tag t-bad">Revisar</span>{% endif %}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  {{ pendiente('Matriz de las 6 pruebas reales (precio y stock; política de descuento con cita; consulta fuera de dominio con «No sé»; descuento fuera de política; reenvío duplicado → 200; consulta vacía → 400) con código HTTP, tiempo de acuse, decisión del Juez y resultado final.') }}
+  {% endif %}
+
+  <h2>3.4 Tres respuestas reales evaluadas por el supervisor</h2>
+  {% if d.ejemplos %}
+  {% for e in d.ejemplos %}
+  <div class="avoid" style="margin-bottom:4mm">
+    <h3>Ejemplo {{ loop.index }}. {{ e.titulo }} <span class="tag {{ 't-ok' if e.decision == 'Aceptado' else ('t-bad' if e.decision == 'Rechazado' else 't-warn') }}">{{ e.decision }}</span></h3>
+    <p class="small"><b>Consulta ({{ e.requestId }}):</b> {{ e.consulta }}</p>
+    <p class="small"><b>Respuesta propuesta por el agente:</b> {{ e.respuesta }}</p>
+    <p class="small" style="margin-bottom:1mm"><b>Evaluación del Juez (JSON plano, tal como quedó en el log):</b></p>
+<pre>{{ e.json }}</pre>
+    <p class="small"><b>Lectura ejecutiva:</b> {{ e.lectura }}</p>
+  </div>
+  {% endfor %}
+  {% else %}
+  {{ pendiente('Tres evaluaciones reales del Juez en JSON plano (columna evaluacion_json del log), cada una con la consulta, la respuesta del agente, la decisión por umbral y una lectura ejecutiva.') }}
+  {% endif %}
+</section>
+
+<section>
+  <h2>3.5 Métricas de precisión obtenidas</h2>
+  {% if d.metricas %}
+  <div class="kpis">
+    {% for m in d.metricas.tiles %}
+    <div class="kpi"><div class="v">{{ m.v }}</div><div class="l">{{ m.l }}</div></div>
+    {% endfor %}
+  </div>
+  {% if d.metricas.nota %}<p class="small muted">{{ d.metricas.nota }}</p>{% endif %}
+  {% else %}
+  {{ pendiente('Cobertura del supervisor (respuestas evaluadas sobre procesadas), concordancia entre la decisión del Juez y el resultado esperado, respuestas con cita de fuente, «No sé» correcto ante consulta fuera de dominio, duplicados bloqueados, consultas inválidas rechazadas, tiempos de acuse y de procesamiento, y revisiones humanas.') }}
+  {% endif %}
+
+  <h2>3.6 Hallazgos de la auditoría previa a producción</h2>
+  <p>La revisión técnica previa a las pruebas encontró dos fallas que habrían dejado trabados los casos dudosos, justamente los que más importan:</p>
+  <table>
+    <tr><th style="width:34%">Hallazgo</th><th style="width:33%">Impacto si no se corregía</th><th>Corrección aplicada</th></tr>
+    <tr><td>La cola humana usaba botones de Telegram que apuntaban a la instancia local; Telegram rechaza enlaces a «localhost»</td><td>Los casos a revisar no llegaban al revisor y quedaban sin respuesta</td><td>La aprobación pasó a un mail con botones «Aprobar y enviar» / «Descartar»; en producción, con <code>WEBHOOK_URL</code> pública, puede volver a cualquier canal</td></tr>
+    <tr><td>Los avisos de Telegram usan formato Markdown y fallaban con nombres de criterios con guion bajo (p. ej. «exactitud_factual»)</td><td>El aviso de error podía fallar justo cuando más se necesitaba</td><td>Se sanea el texto variable de los avisos, y si el aviso falla el error igual queda en el log</td></tr>
+  </table>
+  <p class="small muted">Lección para el comité: el control humano también hay que probarlo. Un circuito de aprobación que falla en silencio es peor que no tenerlo, porque da una falsa sensación de control.</p>
+
+  <h2>3.7 Pruebas previas del Worker (Módulo 5)</h2>
+  <p class="small">Antes de integrarlo, el Worker se probó por separado: (1) ante «¿Cuál es el descuento máximo para Indumentaria sin aprobación adicional?» respondió 25% (30% para mayoristas sin perforar el piso de margen del 12%) con «Fuente: FAQ Sales Ops &amp; Customer Success»; (2) ante una consulta sobre reembolso de viáticos, fuera de su dominio, respondió «No sé, no tengo esa información en mi base de conocimiento» sin inventar.</p>
+</section>
+
+<!-- ===================== 4. ROI ===================== -->
+<section class="page-break">
+  <div class="sec-kicker">Sección 4</div>
+  <h1 class="sec">Justificación financiera (ROI)</h1>
+  <p class="lead">El costo de la inteligencia artificial es marginal: centavos de dólar por consulta. El valor está en las horas de analista que se liberan y en los errores que no llegan al cliente.</p>
+
+  <h2>4.1 Línea base: el proceso manual</h2>
+  <table>
+    <tr><th>Concepto</th><th class="n">Valor</th></tr>
+    <tr><td>Consultas por mes (volumen de referencia)</td><td class="n">{{ r.p.consultas_mes }}</td></tr>
+    <tr><td>Tiempo por consulta (buscar, validar la política, redactar)</td><td class="n">{{ r.p.minutos_por_consulta }} min</td></tr>
+    <tr><td>Horas de analista por mes</td><td class="n">{{ r.horas_manual|num }} h</td></tr>
+    <tr><td>Costo hora cargado de referencia (perfil Jr-Ssr de Sales Ops; insumo del caso de negocio, no dato de nómina)</td><td class="n">USD {{ r.p.costo_hora_usd }}</td></tr>
+    <tr class="total"><td>Costo mensual del proceso manual</td><td class="n">USD {{ r.actual.manual|num }}</td></tr>
+  </table>
+
+  <h2>4.2 Costo de IA por consulta (estimación conservadora)</h2>
+  <p>Cada consulta usa el modelo de lenguaje unas tres o cuatro veces: el Worker decide qué herramienta usar, lee los resultados y redacta, y el Juez evalúa. Para no subestimar se presupuestan <b>{{ r.p.tokens_entrada_por_consulta|num }} tokens de entrada</b> (instrucciones, cuatro fragmentos de la base de conocimiento, memoria, consulta y la rúbrica del Juez) y <b>{{ r.p.tokens_salida_por_consulta|num }} de salida</b> (respuesta, evaluación y razonamiento interno del modelo).</p>
+  <table>
+    <tr><th>Modelo</th><th class="n">USD / 1M entrada</th><th class="n">USD / 1M salida</th><th class="n">Por consulta</th><th class="n">Por mes ({{ r.p.consultas_mes }})</th><th class="n">A 5.000/mes</th></tr>
+    {% for m in r.modelos %}
+    <tr{% if m.base %} class="total"{% endif %}><td>{{ m.nombre }}<br><span class="small muted">{{ m.nota }}</span></td><td class="n">{{ m.entrada|num(2) }}</td><td class="n">{{ m.salida|num(2) }}</td><td class="n">USD {{ m.por_consulta|num(4) }}</td><td class="n">USD {{ m.por_mes|num(2) }}</td><td class="n">USD {{ m.por_mes_5000|num(2) }}</td></tr>
+    {% endfor %}
+  </table>
+  <p class="small muted">Precios de lista por millón de tokens, consultados en octubre de 2026 (Google AI, OpenAI y Anthropic). Hoy el prototipo opera en el tier gratuito de Gemini (costo USD 0); se costea el tier pago porque es el que corresponde en producción. Los embeddings de la consulta (unos 30 tokens) son despreciables.</p>
+
+  <h2>4.3 Costo total de operación (TCO) mensual: manual vs. agente</h2>
+  <p>Supuesto: el agente resuelve solo el {{ (1 - r.p.tasa_derivacion)|pct }} de las consultas y el {{ r.p.tasa_derivacion|pct }} restante pasa a revisión humana con el mismo tiempo que hoy (supuesto conservador, porque revisar un borrador es más rápido que redactar). Se suma el hosting de n8n en un servidor básico (unos USD {{ r.p.hosting_usd_mes }} por mes).</p>
+  <table>
+    <tr><th class="n">Consultas/mes</th><th class="n">Manual</th><th class="n">Humano residual</th><th class="n">IA (tokens)</th><th class="n">Hosting</th><th class="n">Total con agente</th><th class="n">Ahorro mensual</th><th class="n">Horas evitadas</th></tr>
+    {% for e in r.escalas %}
+    <tr{% if loop.first %} class="total"{% endif %}><td class="n">{{ e.vol|num }}</td><td class="n">USD {{ e.manual|num }}</td><td class="n">USD {{ e.humano|num }}</td><td class="n">USD {{ e.tokens|num(2) }}</td><td class="n">USD {{ e.hosting|num }}</td><td class="n">USD {{ e.agente|num }}</td><td class="n">USD {{ e.ahorro|num }}</td><td class="n">{{ e.h_evitadas|num }} h</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>4.4 Indicadores de retorno</h2>
+  <div class="kpis">
+    <div class="kpi"><div class="v">{{ r.actual.h_evitadas|num }} h/mes</div><div class="l">Horas humanas evitadas al volumen actual</div></div>
+    <div class="kpi"><div class="v">USD {{ r.actual.ahorro|num }}</div><div class="l">Ahorro neto mensual (USD {{ r.ahorro_anual|num }} por año)</div></div>
+    <div class="kpi"><div class="v">{{ r.roi12|pct }}</div><div class="l">ROI a 12 meses sobre una inversión de USD {{ r.p.inversion_usd }} (40 h × USD 15)</div></div>
+  </div>
+  <p>Recupero de la inversión: <b>{{ r.payback|num(1) }} meses</b>. El costo de IA representa menos del {{ (r.actual.tokens / r.actual.agente)|pct(0) }} del costo con agente; el resto es tiempo humano residual y hosting.</p>
+</section>
+
+<section>
+  <h2>4.5 Sensibilidad: qué pasa si el agente deriva más o menos casos</h2>
+  <table>
+    <tr><th>Escenario de derivación a personas</th><th class="n">Horas residuales</th><th class="n">Costo con agente</th><th class="n">Ahorro mensual</th><th class="n">Recupero</th></tr>
+    {% for s in r.sens %}
+    <tr{% if s.deriv == r.p.tasa_derivacion %} class="total"{% endif %}><td>{{ s.deriv|pct }} de los casos a revisión humana</td><td class="n">{{ s.h_resid|num(1) }} h</td><td class="n">USD {{ s.agente|num }}</td><td class="n">USD {{ s.ahorro|num }}</td><td class="n">{{ s.payback|num(1) }} meses</td></tr>
+    {% endfor %}
+  </table>
+  <p>Incluso si el 40% de las consultas termina en manos de una persona, el sistema se paga en menos de seis meses. <b>La palanca de ahorro no es el precio del modelo sino la tasa de resolución autónoma</b>; por eso es el indicador principal del piloto.</p>
+
+  <h2>4.6 Optimización de la ventana de contexto</h2>
+  <ul>
+    <li><b>Recuperación acotada:</b> la base de conocimiento entrega solo los 4 fragmentos más relevantes, no los documentos completos.</li>
+    <li><b>Memoria resumida:</b> se inyecta un resumen de una o dos líneas, nunca la conversación entera.</li>
+    <li><b>Juez con contexto mínimo:</b> evalúa solo la consulta y la respuesta, lo que abarata cada auditoría y la hace más objetiva.</li>
+    <li><b>Validación antes de gastar:</b> las consultas vacías y los duplicados se resuelven sin llamar al modelo.</li>
+    <li><b>Próxima mejora:</b> filtrar el catálogo por SKU en lugar de leer la hoja completa (203 productos × 37 columnas), y cachear las instrucciones fijas (en Claude Haiku, la lectura de caché cuesta 0,1× el precio de entrada).</li>
+    <li><b>Modelos económicos:</b> GPT-4o-mini, Gemini Flash o Claude Haiku cuestan menos de USD 3 por mes al volumen actual; la elección final debe priorizar la privacidad de los datos (2.7) antes que la diferencia de centavos.</li>
+  </ul>
+
+  <h2>4.7 Conclusión</h2>
+  <div class="box green">
+    <p>Con un costo de IA de <b>USD {{ r.actual.tokens|num(2) }} por mes</b>, el agente libera <b>{{ r.actual.h_evitadas|num }} horas mensuales</b> de analista, reduce el costo del proceso de <b>USD {{ r.actual.manual|num }}</b> a <b>USD {{ r.actual.agente|num }}</b> por mes y recupera la inversión en <b>{{ r.payback|num(1) }} meses</b>. Además, cada respuesta queda auditada y trazable, y ninguna sale sin pasar por el supervisor. Se recomienda aprobar el piloto de 30 días en las condiciones de la Sección 1.</p>
+  </div>
+
+  <!-- ===================== ANEXOS ===================== -->
+  <h2>Anexo A. Repositorio y archivos</h2>
+  <p class="small">Repositorio: <b>github.com/gianfrancodastolfo/agente-pricing-coderhouse</b>, carpeta <code>proyecto-final/</code>: JSON importables de los cuatro workflows PF (sin credenciales), kit de pruebas, fuentes de este documento y el script que calcula las cifras de la Sección 4.</p>
+  <h2>Anexo B. Correcciones respecto de las pre-entregas</h2>
+  <ul class="small">
+    <li>El plan del Módulo 9 indicaba que la inversión se recuperaba «dentro del primer trimestre». Con un ahorro neto de unos USD 175 por mes, USD 600 se recuperan en unos 3,5 meses; este documento usa esa cifra.</li>
+    <li>El costo en tokens se recalculó con un perfil más conservador ({{ r.p.tokens_entrada_por_consulta|num }} / {{ r.p.tokens_salida_por_consulta|num }} tokens por consulta, contra 2.500 / 350 en el Módulo 9) y con precios vigentes, porque el modelo de referencia anterior (Gemini 2.5 Flash) tiene fecha de baja anunciada.</li>
+    <li>La aprobación humana se migró de Telegram a mail (ver 3.6).</li>
+  </ul>
+</section>
+
+</body>
+</html>

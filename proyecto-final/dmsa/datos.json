@@ -1,0 +1,27 @@
+{
+  "fecha_documento": "octubre de 2026",
+  "pruebas_completas": false,
+  "fecha_pruebas": null,
+  "pruebas": [],
+  "ejemplos": [],
+  "metricas": null,
+  "tiempos": null,
+  "memoria_ejemplo": null,
+  "mail_ejemplo": null,
+  "roi": {
+    "consultas_mes": 150,
+    "minutos_por_consulta": 8,
+    "costo_hora_usd": 12,
+    "tasa_derivacion": 0.25,
+    "hosting_usd_mes": 6,
+    "inversion_usd": 600,
+    "tokens_entrada_por_consulta": 8000,
+    "tokens_salida_por_consulta": 1500,
+    "modelos": [
+      {"nombre": "Gemini 3 Flash (tier pago)", "entrada": 0.50, "salida": 3.00, "nota": "modelo usado en el prototipo (hoy en tier gratuito)", "base": true},
+      {"nombre": "GPT-4o-mini", "entrada": 0.15, "salida": 0.60, "nota": "opción más económica"},
+      {"nombre": "Claude Haiku 4.5", "entrada": 1.00, "salida": 5.00, "nota": "sin uso de datos para entrenamiento por defecto en la API comercial; caché de prompt a 0,1×"}
+    ],
+    "volumenes": [150, 500, 1000, 5000]
+  }
+}

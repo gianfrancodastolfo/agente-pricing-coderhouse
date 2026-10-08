@@ -1,0 +1,56 @@
+[
+ {
+  "caso": "Todo alto (5/5/5/5, Aceptado)",
+  "decision": "Aceptado",
+  "puntaje_global": 5,
+  "motivos": "supera todos los umbrales"
+ },
+ {
+  "caso": "Exactitud 4, resto 4 (Aceptado)",
+  "decision": "Aceptado",
+  "puntaje_global": 4,
+  "motivos": "supera todos los umbrales"
+ },
+ {
+  "caso": "Exactitud 3 (< 4), Juez dice Aceptado",
+  "decision": "Corregir",
+  "puntaje_global": 4.5,
+  "motivos": "exactitud_factual 3 < 4"
+ },
+ {
+  "caso": "Cobertura 2 (< 3)",
+  "decision": "Corregir",
+  "puntaje_global": 4.25,
+  "motivos": "cobertura_consulta 2 < 3"
+ },
+ {
+  "caso": "Juez dice Corregir con notas altas",
+  "decision": "Corregir",
+  "puntaje_global": 4.75,
+  "motivos": "veredicto del Juez: Corregir"
+ },
+ {
+  "caso": "Alucinación (ausencia 2)",
+  "decision": "Rechazado",
+  "puntaje_global": 3.5,
+  "motivos": "ausencia_alucinaciones 2 < 3; veredicto del Juez: Corregir"
+ },
+ {
+  "caso": "Exactitud 2",
+  "decision": "Rechazado",
+  "puntaje_global": 3.5,
+  "motivos": "exactitud_factual 2 < 4; veredicto del Juez: Corregir"
+ },
+ {
+  "caso": "Juez dice Rechazado",
+  "decision": "Rechazado",
+  "puntaje_global": 4,
+  "motivos": "veredicto del Juez: Rechazado"
+ },
+ {
+  "caso": "Salida inválida del Juez (vacía)",
+  "decision": "Corregir",
+  "puntaje_global": 0,
+  "motivos": "el Juez no devolvió una evaluación válida"
+ }
+]

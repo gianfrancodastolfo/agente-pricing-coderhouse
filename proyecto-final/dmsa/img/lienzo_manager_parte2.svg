@@ -1,0 +1,229 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2260.0" height="1070.0" viewBox="2220.0 -430.0 2260.0 1070.0" font-family="Inter, DejaVu Sans, sans-serif">
+<defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#d5d8de"/></pattern><marker id="m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#8a8f98"/></marker><marker id="me" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#e03131"/></marker></defs>
+<rect x="2220.0" y="-430.0" width="2260.0" height="1070.0" fill="#f7f8fa"/><rect x="2220.0" y="-430.0" width="2260.0" height="1070.0" fill="url(#dots)"/>
+<rect x="-60" y="-260" width="1560" height="640" rx="6" fill="#f0f0f0" stroke="#cfcfcf" stroke-width="1.5"/>
+<text x="-44" y="-226" font-size="22" font-weight="700" fill="#2b2b2b">1 · Recepción asincrónica e idempotencia</text>
+<text x="-44" y="-193" font-size="15" font-weight="400" fill="#2b2b2b">El webhook valida la solicitud, descarta duplicados (mismo requestId) y responde al instante con un código de seguimiento (202). Todo lo demás corre en segundo plano.</text>
+<rect x="1540" y="-260" width="680" height="640" rx="6" fill="#dcecfb" stroke="#9fc7ef" stroke-width="1.5"/>
+<text x="1556" y="-226" font-size="22" font-weight="700" fill="#2b2b2b">2 · Memoria + Worker de Consulta</text>
+<text x="1556" y="-193" font-size="15" font-weight="400" fill="#2b2b2b">Recupera la memoria persistente de la sesión y delega al Worker de Consulta (RAG</text>
+<text x="1556" y="-171" font-size="15" font-weight="400" fill="#2b2b2b">con cita de fuentes + catálogo).</text>
+<rect x="2240" y="-400" width="760" height="640" rx="6" fill="#ebe5fd" stroke="#c4b6f3" stroke-width="1.5"/>
+<text x="2256" y="-366" font-size="22" font-weight="700" fill="#2b2b2b">3 · Supervisor AI-as-a-Judge</text>
+<text x="2256" y="-333" font-size="15" font-weight="400" fill="#2b2b2b">Toda respuesta pasa por el sub-workflow Juez antes de registrarse o enviarse. Rúbrica 1-5;</text>
+<text x="2256" y="-311" font-size="15" font-weight="400" fill="#2b2b2b">exactitud_factual &lt; 4 congela la autonomía.</text>
+<rect x="3010" y="-400" width="1420" height="920" rx="6" fill="#e3f3e0" stroke="#a9d6a2" stroke-width="1.5"/>
+<text x="3026" y="-366" font-size="22" font-weight="700" fill="#2b2b2b">4 · Human-in-the-loop y despacho</text>
+<text x="3026" y="-333" font-size="15" font-weight="400" fill="#2b2b2b">Aceptado → se despacha solo. Corregir / Rechazado → cola de aprobación humana por mail (botones Aprobar y enviar / Descartar; el flujo espera). Al cerrar: log y memoria de</text>
+<text x="3026" y="-311" font-size="15" font-weight="400" fill="#2b2b2b">sesión actualizados.</text>
+<rect x="2240" y="260" width="760" height="300" rx="6" fill="#fbe1e1" stroke="#efb4b4" stroke-width="1.5"/>
+<text x="2256" y="294" font-size="22" font-weight="700" fill="#2b2b2b">Ramas de error</text>
+<text x="2256" y="327" font-size="15" font-weight="400" fill="#2b2b2b">Si un worker o el Juez fallan (tras reintentos), se alerta al equipo y se registra en el</text>
+<text x="2256" y="349" font-size="15" font-weight="400" fill="#2b2b2b">log. Fallas no previstas → workflow de Alertas.</text>
+<path d="M100,50.0 C160,50.0 160,50.0 216,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M320,50.0 C380,50.0 380,50.0 436,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M540,33.333333333333336 C600,33.333333333333336 600,50.0 656,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M540,66.66666666666667 C600,66.66666666666667 600,270.0 656,270.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M760,50.0 C820,50.0 820,50.0 876,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M980,33.333333333333336 C1040,33.333333333333336 1040,270.0 1096,270.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M980,66.66666666666667 C1040,66.66666666666667 1040,50.0 1096,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M1200,270.0 C1260,270.0 1260,270.0 1316,270.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M1200,50.0 C1260,50.0 1260,50.0 1316,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M1420,50.0 C1510.0,50.0 1510.0,50.0 1596,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M1700,50.0 C1760,50.0 1760,50.0 1816,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M1920,50.0 C1980,50.0 1980,50.0 2036,50.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2140,33.333333333333336 C2210.0,33.333333333333336 2210.0,30.0 2276,30.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2140,66.66666666666667 C2320.0,66.66666666666667 2320.0,450.0 2496,450.0" fill="none" stroke="#e03131" stroke-width="2.2" marker-end="url(#me)"/>
+<path d="M2380,30.0 C2440,30.0 2440,30.0 2496,30.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2600,13.333333333333336 C2680.0,13.333333333333336 2680.0,-190.0 2756,-190.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2600,13.333333333333336 C2680.0,13.333333333333336 2680.0,30.0 2756,30.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2600,46.66666666666667 C2660,46.66666666666667 2660,550 2600,550 L2500,550 C2440,550 2440,450.0 2500,450.0" fill="none" stroke="#e03131" stroke-width="2.2" marker-end="url(#me)"/>
+<path d="M2860,5.0 C3290.0,5.0 3290.0,30.0 3716,30.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2860,30.0 C2950.0,30.0 2950.0,210.0 3036,210.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2860,55.0 C2950.0,55.0 2950.0,210.0 3036,210.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M3140,210.0 C3200,210.0 3200,210.0 3256,210.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M3360,193.33333333333334 C3420,193.33333333333334 3420,110.0 3476,110.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M3360,226.66666666666669 C3420,226.66666666666669 3420,350.0 3476,350.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M3580,110.0 C3650.0,110.0 3650.0,30.0 3716,30.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M3820,13.333333333333336 C3890.0,13.333333333333336 3890.0,30.0 3956,30.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M3820,46.66666666666667 C3880,46.66666666666667 3880,550 3820,550 L2500,550 C2440,550 2440,450.0 2500,450.0" fill="none" stroke="#e03131" stroke-width="2.2" marker-end="url(#me)"/>
+<path d="M4060,30.0 C4130.0,30.0 4130.0,30.0 4196,30.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M2600,450.0 C2680.0,450.0 2680.0,450.0 2756,450.0" fill="none" stroke="#8a8f98" stroke-width="2.2" marker-end="url(#m)"/>
+<path d="M40,0 L90,0 Q100,0 100,10 L100,90 Q100,100 90,100 L40,100 A40,50 0 0 1 40,0 z" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="100" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="50.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#e8590c">⚡</text>
+<text x="50.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Webhook: Recibir</text>
+<text x="50.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Solicitud</text>
+<rect x="220" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="320" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="220" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="270.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#4c6ef5">✎</text>
+<text x="270.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Normalizar</text>
+<text x="270.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Solicitud</text>
+<rect x="440" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="540" cy="33.333333333333336" r="5" fill="#8a8f98"/>
+<text x="549" y="26.333333333333336" font-size="12" fill="#5c636e">true</text>
+<circle cx="540" cy="66.66666666666667" r="5" fill="#8a8f98"/>
+<text x="549" y="59.66666666666667" font-size="12" fill="#5c636e">false</text>
+<circle cx="440" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="490.0" y="57.92" text-anchor="middle" font-size="22" font-weight="700" fill="#2f9e44">IF</text>
+<text x="490.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">¿Consulta válida?</text>
+<rect x="660" y="220" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="760" cy="270.0" r="5" fill="#8a8f98"/>
+<circle cx="660" cy="270.0" r="5" fill="#8a8f98"/>
+<text x="710.0" y="280.8" text-anchor="middle" font-size="30" font-weight="700" fill="#495057">↩</text>
+<text x="710.0" y="340" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Responder 400</text>
+<text x="710.0" y="356" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">(consulta vacía)</text>
+<rect x="660" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="760" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="660" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="710.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="710.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Control de</text>
+<text x="710.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Duplicados (Log)</text>
+<rect x="880" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="980" cy="33.333333333333336" r="5" fill="#8a8f98"/>
+<text x="989" y="26.333333333333336" font-size="12" fill="#5c636e">true</text>
+<circle cx="980" cy="66.66666666666667" r="5" fill="#8a8f98"/>
+<text x="989" y="59.66666666666667" font-size="12" fill="#5c636e">false</text>
+<circle cx="880" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="930.0" y="57.92" text-anchor="middle" font-size="22" font-weight="700" fill="#2f9e44">IF</text>
+<text x="930.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">¿Solicitud</text>
+<text x="930.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">duplicada?</text>
+<rect x="1100" y="220" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="1200" cy="270.0" r="5" fill="#8a8f98"/>
+<circle cx="1100" cy="270.0" r="5" fill="#8a8f98"/>
+<text x="1150.0" y="280.8" text-anchor="middle" font-size="30" font-weight="700" fill="#495057">↩</text>
+<text x="1150.0" y="340" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Responder 200 (ya</text>
+<text x="1150.0" y="356" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">recibida)</text>
+<rect x="1100" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="1200" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="1100" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="1150.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#495057">↩</text>
+<text x="1150.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Responder 202</text>
+<text x="1150.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">(recibido)</text>
+<rect x="1320" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="1420" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="1320" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="1370.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="1370.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Registrar</text>
+<text x="1370.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Recepción (Log)</text>
+<rect x="1600" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="1700" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="1600" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="1650.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="1650.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Buscar Memoria de</text>
+<text x="1650.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Sesión</text>
+<rect x="1820" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="1920" cy="50.0" r="5" fill="#8a8f98"/>
+<circle cx="1820" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="1870.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#4c6ef5">✎</text>
+<text x="1870.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Armar Contexto de</text>
+<text x="1870.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Memoria</text>
+<rect x="2040" y="0" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="2140" cy="33.333333333333336" r="5" fill="#8a8f98"/>
+<circle cx="2140" cy="66.66666666666667" r="5" fill="#8a8f98"/>
+<text x="2149" y="59.66666666666667" font-size="12" fill="#e03131">error</text>
+<circle cx="2040" cy="50.0" r="5" fill="#8a8f98"/>
+<text x="2090.0" y="60.8" text-anchor="middle" font-size="30" font-weight="700" fill="#5f3dc4">⇢</text>
+<text x="2132" y="16" text-anchor="end" font-size="11" fill="#5f3dc4">↻3</text>
+<text x="2090.0" y="120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Delegar a Worker</text>
+<text x="2090.0" y="136" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Consulta (RAG +</text>
+<text x="2090.0" y="152" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Catálogo)</text>
+<rect x="2280" y="-20" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="2380" cy="30.0" r="5" fill="#8a8f98"/>
+<circle cx="2280" cy="30.0" r="5" fill="#8a8f98"/>
+<text x="2330.0" y="40.8" text-anchor="middle" font-size="30" font-weight="700" fill="#4c6ef5">✎</text>
+<text x="2330.0" y="100" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Preparar</text>
+<text x="2330.0" y="116" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Evaluación</text>
+<rect x="2500" y="-20" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="2600" cy="13.333333333333336" r="5" fill="#8a8f98"/>
+<circle cx="2600" cy="46.66666666666667" r="5" fill="#8a8f98"/>
+<text x="2609" y="39.66666666666667" font-size="12" fill="#e03131">error</text>
+<circle cx="2500" cy="30.0" r="5" fill="#8a8f98"/>
+<text x="2550.0" y="40.8" text-anchor="middle" font-size="30" font-weight="700" fill="#5f3dc4">⇢</text>
+<text x="2592" y="-4" text-anchor="end" font-size="11" fill="#5f3dc4">↻2</text>
+<text x="2550.0" y="100" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Supervisor: Juez</text>
+<text x="2550.0" y="116" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">de Calidad</text>
+<rect x="2760" y="-240" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="2860" cy="-190.0" r="5" fill="#8a8f98"/>
+<circle cx="2760" cy="-190.0" r="5" fill="#8a8f98"/>
+<text x="2810.0" y="-179.2" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="2810.0" y="-120" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Registrar</text>
+<text x="2810.0" y="-104" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Evaluación (Log)</text>
+<rect x="2760" y="-20" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="2860" cy="5.0" r="5" fill="#8a8f98"/>
+<text x="2869" y="-2.0" font-size="12" fill="#5c636e">Aceptado</text>
+<circle cx="2860" cy="30.0" r="5" fill="#8a8f98"/>
+<text x="2869" y="23.0" font-size="12" fill="#5c636e">Corregir</text>
+<circle cx="2860" cy="55.0" r="5" fill="#8a8f98"/>
+<text x="2869" y="48.0" font-size="12" fill="#5c636e">Rechazado</text>
+<circle cx="2760" cy="30.0" r="5" fill="#8a8f98"/>
+<text x="2810.0" y="40.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2f9e44">⇶</text>
+<text x="2810.0" y="100" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Switch: Decisión</text>
+<text x="2810.0" y="116" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">del Supervisor</text>
+<rect x="3040" y="160" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="3140" cy="210.0" r="5" fill="#8a8f98"/>
+<circle cx="3040" cy="210.0" r="5" fill="#8a8f98"/>
+<text x="3090.0" y="220.8" text-anchor="middle" font-size="30" font-weight="700" fill="#c92a2a">✉</text>
+<text x="3090.0" y="280" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Cola de Aprobación</text>
+<text x="3090.0" y="296" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Humana (Gmail)</text>
+<rect x="3260" y="160" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="3360" cy="193.33333333333334" r="5" fill="#8a8f98"/>
+<text x="3369" y="186.33333333333334" font-size="12" fill="#5c636e">true</text>
+<circle cx="3360" cy="226.66666666666669" r="5" fill="#8a8f98"/>
+<text x="3369" y="219.66666666666669" font-size="12" fill="#5c636e">false</text>
+<circle cx="3260" cy="210.0" r="5" fill="#8a8f98"/>
+<text x="3310.0" y="217.92" text-anchor="middle" font-size="22" font-weight="700" fill="#2f9e44">IF</text>
+<text x="3310.0" y="280" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">¿Aprobada por el</text>
+<text x="3310.0" y="296" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">revisor?</text>
+<rect x="3480" y="60" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="3580" cy="110.0" r="5" fill="#8a8f98"/>
+<circle cx="3480" cy="110.0" r="5" fill="#8a8f98"/>
+<text x="3530.0" y="120.8" text-anchor="middle" font-size="30" font-weight="700" fill="#4c6ef5">✎</text>
+<text x="3530.0" y="180" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Marcar Aprobación</text>
+<text x="3530.0" y="196" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Humana</text>
+<rect x="3480" y="300" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="3580" cy="350.0" r="5" fill="#8a8f98"/>
+<circle cx="3480" cy="350.0" r="5" fill="#8a8f98"/>
+<text x="3530.0" y="360.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="3530.0" y="420" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Registrar Descarte</text>
+<text x="3530.0" y="436" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">(Log)</text>
+<rect x="3720" y="-20" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="3820" cy="13.333333333333336" r="5" fill="#8a8f98"/>
+<circle cx="3820" cy="46.66666666666667" r="5" fill="#8a8f98"/>
+<text x="3829" y="39.66666666666667" font-size="12" fill="#e03131">error</text>
+<circle cx="3720" cy="30.0" r="5" fill="#8a8f98"/>
+<text x="3770.0" y="40.8" text-anchor="middle" font-size="30" font-weight="700" fill="#5f3dc4">⇢</text>
+<text x="3770.0" y="100" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Despachar</text>
+<text x="3770.0" y="116" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Respuesta (Worker</text>
+<text x="3770.0" y="132" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Despacho)</text>
+<rect x="3960" y="-20" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="4060" cy="30.0" r="5" fill="#8a8f98"/>
+<circle cx="3960" cy="30.0" r="5" fill="#8a8f98"/>
+<text x="4010.0" y="40.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="4010.0" y="100" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Cerrar Caso (Log)</text>
+<rect x="4200" y="-20" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="4300" cy="30.0" r="5" fill="#8a8f98"/>
+<circle cx="4200" cy="30.0" r="5" fill="#8a8f98"/>
+<text x="4250.0" y="40.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="4250.0" y="100" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Actualizar Memoria</text>
+<text x="4250.0" y="116" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">de Sesión</text>
+<rect x="2500" y="400" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="2600" cy="450.0" r="5" fill="#8a8f98"/>
+<circle cx="2500" cy="450.0" r="5" fill="#8a8f98"/>
+<text x="2550.0" y="460.8" text-anchor="middle" font-size="30" font-weight="700" fill="#1c7ed6">✈</text>
+<text x="2550.0" y="520" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Alerta de Falla</text>
+<text x="2550.0" y="536" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">(Telegram)</text>
+<rect x="2760" y="400" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="2860" cy="450.0" r="5" fill="#8a8f98"/>
+<circle cx="2760" cy="450.0" r="5" fill="#8a8f98"/>
+<text x="2810.0" y="460.8" text-anchor="middle" font-size="30" font-weight="700" fill="#2b8a3e">▦</text>
+<text x="2810.0" y="520" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Registrar Error</text>
+<text x="2810.0" y="536" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">(Log)</text>
+<rect x="1320" y="220" width="100" height="100" rx="10" fill="#fff" stroke="#b9bec7" stroke-width="2"/>
+<circle cx="1420" cy="270.0" r="5" fill="#8a8f98"/>
+<circle cx="1320" cy="270.0" r="5" fill="#8a8f98"/>
+<text x="1370.0" y="280.8" text-anchor="middle" font-size="30" font-weight="700" fill="#868e96">→</text>
+<text x="1370.0" y="340" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Descartar</text>
+<text x="1370.0" y="356" text-anchor="middle" font-size="13.5" font-weight="600" fill="#2b2b2b">Duplicado</text>
+</svg>

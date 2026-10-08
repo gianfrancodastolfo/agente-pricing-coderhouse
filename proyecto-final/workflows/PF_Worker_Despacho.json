@@ -1,0 +1,108 @@
+{
+  "name": "PF - Worker Despacho (Notificación)",
+  "nodes": [
+    {
+      "id": "03d395ed-bf84-40f3-9bce-36c91d185453",
+      "name": "Recibir Resultado Validado",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "0a08a349-5f75-4490-bbc2-ebd1f2b4a1f7",
+      "name": "Enviar Respuesta Validada (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "sendTo": "gianfrancodastolfo@gmail.com",
+        "subject": "=[Agente de Pricing] Respuesta validada · {{ $json.requestId }}",
+        "emailType": "text",
+        "message": "=Consulta: {{ $json.consulta }}\n\nRespuesta:\n{{ $json.respuesta }}\n\n—\nControl de calidad: {{ $json.evaluacion.veredicto_juez }} · puntaje {{ $json.evaluacion.puntaje_global }}/5 · exactitud factual {{ $json.evaluacion.exactitud_factual }}/5\nAprobación: {{ $json.aprobado_por || 'automática (supera los umbrales del Juez)' }}\nCódigo de seguimiento: {{ $json.requestId }} · traceId {{ $json.traceId }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Ymt66CwwNVqyZcw7",
+          "name": "Gmail account"
+        }
+      },
+      "webhookId": "0c0493f1-57cf-4605-811c-dca5b027f412"
+    },
+    {
+      "id": "eaeaae4f-f3b1-496e-9daa-19020175062f",
+      "name": "Contrato de Salida",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify(Object.assign({}, $('Recibir Resultado Validado').item.json, { status: 'success', canal_entrega: 'gmail', messageId: $json.id })) }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "31022339-cabf-42d1-abde-706c0541c2b0",
+      "name": "Nota Despacho",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -200
+      ],
+      "parameters": {
+        "content": "## Worker de Despacho\nÚnico punto de salida hacia el usuario: solo recibe respuestas ya validadas (por el Juez o por un revisor humano).",
+        "height": 160,
+        "width": 680,
+        "color": 4
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Resultado Validado": {
+      "main": [
+        [
+          {
+            "node": "Enviar Respuesta Validada (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Respuesta Validada (Gmail)": {
+      "main": [
+        [
+          {
+            "node": "Contrato de Salida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "id": "P1OS0qJWxkzUgl7o"
+}

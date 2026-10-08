@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="790" viewBox="0 0 1200 790" font-family="Inter, 'DejaVu Sans', sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#4a4a4a"/></marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2e7d32"/></marker>
+    <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a8761b"/></marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#a33a3a"/></marker>
+    <style>
+      .t{font-size:15px;font-weight:700;fill:#1b1b1b}
+      .s{font-size:12px;fill:#3d3d3d}
+      .tag{font-size:10px;font-weight:700;letter-spacing:.06em;fill:#5b3f99}
+      .lbl{font-size:12px;font-weight:700}
+      .ln{stroke:#4a4a4a;stroke-width:2.2;fill:none}
+    </style>
+  </defs>
+
+  <!-- Manager -->
+  <rect x="200" y="30" width="700" height="560" rx="16" fill="#f6f8fc" stroke="#1f3a68" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="222" y="60" font-size="15" font-weight="700" fill="#1f3a68">MANAGER · orquestador asincrónico (workflow principal)</text>
+
+  <!-- Fila 1 -->
+  <rect x="222" y="95" width="200" height="105" rx="10" fill="#dde6f5" stroke="#2f5ea8" stroke-width="2"/>
+  <text x="322" y="125" text-anchor="middle" class="t">1 · Recepción</text>
+  <text x="322" y="150" text-anchor="middle" class="s">valida y descarta duplicados</text>
+  <text x="322" y="168" text-anchor="middle" class="s">responde 202 al instante</text>
+  <text x="322" y="186" text-anchor="middle" class="s">con código de seguimiento</text>
+
+  <rect x="452" y="95" width="196" height="105" rx="10" fill="#dde6f5" stroke="#2f5ea8" stroke-width="2"/>
+  <text x="550" y="125" text-anchor="middle" class="t">2 · Memoria</text>
+  <text x="550" y="150" text-anchor="middle" class="s">recupera el resumen y</text>
+  <text x="550" y="168" text-anchor="middle" class="s">estado previo del cliente</text>
+  <text x="550" y="186" text-anchor="middle" class="s">(contexto delimitado)</text>
+
+  <rect x="678" y="95" width="200" height="105" rx="10" fill="#dde6f5" stroke="#2f5ea8" stroke-width="2"/>
+  <text x="778" y="112" text-anchor="middle" class="tag">SUB-WORKFLOW</text>
+  <text x="778" y="132" text-anchor="middle" class="t">3 · Worker Consulta</text>
+  <text x="778" y="155" text-anchor="middle" class="s">RAG: cita la fuente o</text>
+  <text x="778" y="173" text-anchor="middle" class="s">responde "No sé"</text>
+  <text x="778" y="191" text-anchor="middle" class="s">+ catálogo de precios</text>
+
+  <!-- Fila 2 -->
+  <rect x="678" y="265" width="200" height="105" rx="10" fill="#ebe4f6" stroke="#5b3f99" stroke-width="2"/>
+  <text x="778" y="282" text-anchor="middle" class="tag">SUB-WORKFLOW</text>
+  <text x="778" y="302" text-anchor="middle" class="t">4 · Juez de Calidad</text>
+  <text x="778" y="325" text-anchor="middle" class="s">AI-as-a-Judge: puntúa</text>
+  <text x="778" y="343" text-anchor="middle" class="s">4 criterios de 1 a 5</text>
+  <text x="778" y="361" text-anchor="middle" class="s">en JSON (rúbrica fija)</text>
+
+  <rect x="452" y="265" width="196" height="105" rx="10" fill="#ebe4f6" stroke="#5b3f99" stroke-width="2"/>
+  <text x="550" y="295" text-anchor="middle" class="t">5 · Decisión</text>
+  <text x="550" y="320" text-anchor="middle" class="s">regla fija, no la IA:</text>
+  <text x="550" y="338" text-anchor="middle" class="s">exactitud ≥ 4 y resto ≥ 3</text>
+  <text x="550" y="356" text-anchor="middle" class="s">→ autonomía habilitada</text>
+
+  <rect x="222" y="265" width="200" height="105" rx="10" fill="#e3f0dc" stroke="#2e7d32" stroke-width="2"/>
+  <text x="322" y="282" text-anchor="middle" class="tag" style="fill:#2e7d32">SUB-WORKFLOW</text>
+  <text x="322" y="302" text-anchor="middle" class="t">6 · Worker Despacho</text>
+  <text x="322" y="325" text-anchor="middle" class="s">único canal de salida:</text>
+  <text x="322" y="343" text-anchor="middle" class="s">mail con la respuesta</text>
+  <text x="322" y="361" text-anchor="middle" class="s">validada (Gmail)</text>
+
+  <!-- Fila 3 -->
+  <rect x="452" y="440" width="196" height="110" rx="10" fill="#fbefd5" stroke="#a8761b" stroke-width="2"/>
+  <text x="550" y="468" text-anchor="middle" class="t">Cola humana</text>
+  <text x="550" y="492" text-anchor="middle" class="s">mail con botones</text>
+  <text x="550" y="510" text-anchor="middle" class="s">Aprobar y enviar / Descartar</text>
+  <text x="550" y="528" text-anchor="middle" class="s">(el caso queda en espera)</text>
+
+  <rect x="678" y="440" width="200" height="110" rx="10" fill="#f6e0e0" stroke="#a33a3a" stroke-width="2"/>
+  <text x="778" y="468" text-anchor="middle" class="t">Rama de error</text>
+  <text x="778" y="492" text-anchor="middle" class="s">reintentos automáticos;</text>
+  <text x="778" y="510" text-anchor="middle" class="s">si persiste: aviso por</text>
+  <text x="778" y="528" text-anchor="middle" class="s">Telegram + registro en log</text>
+
+  <rect x="222" y="440" width="200" height="110" rx="10" fill="#ffffff" stroke="#9aa6bd" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="322" y="468" text-anchor="middle" class="lbl" fill="#1f3a68">Correlación</text>
+  <text x="322" y="492" text-anchor="middle" class="s">requestId (idempotencia) y</text>
+  <text x="322" y="510" text-anchor="middle" class="s">traceId viajan en cada paso</text>
+  <text x="322" y="528" text-anchor="middle" class="s">y en cada fila del log</text>
+
+  <!-- Flechas internas -->
+  <line x1="422" y1="147" x2="448" y2="147" class="ln" marker-end="url(#a)"/>
+  <line x1="648" y1="147" x2="674" y2="147" class="ln" marker-end="url(#a)"/>
+  <line x1="778" y1="200" x2="778" y2="261" class="ln" marker-end="url(#a)"/>
+  <line x1="678" y1="317" x2="652" y2="317" class="ln" marker-end="url(#a)"/>
+  <line x1="452" y1="317" x2="426" y2="317" stroke="#2e7d32" stroke-width="2.6" marker-end="url(#ag)"/>
+  <text x="438" y="250" text-anchor="middle" class="lbl" fill="#2e7d32">Aceptado</text>
+  <line x1="438" y1="256" x2="438" y2="308" stroke="#2e7d32" stroke-width="1" stroke-dasharray="2 3"/>
+  <line x1="550" y1="370" x2="550" y2="436" stroke="#a8761b" stroke-width="2.6" marker-end="url(#aa)"/>
+  <text x="560" y="398" class="lbl" fill="#a8761b">Corregir / Rechazado</text>
+  <text x="560" y="414" class="s" fill="#a8761b">(autonomía congelada)</text>
+  <path d="M472,440 L472,405 L392,405 L392,374" stroke="#2e7d32" stroke-width="2.6" fill="none" marker-end="url(#ag)"/>
+  <text x="400" y="424" class="lbl" fill="#2e7d32">aprobado</text>
+  <path d="M878,147 L895,147 L895,470 L882,470" stroke="#a33a3a" stroke-width="1.8" fill="none" stroke-dasharray="6 4" marker-end="url(#ar)"/>
+  <path d="M878,317 L895,317" stroke="#a33a3a" stroke-width="1.8" fill="none" stroke-dasharray="6 4"/>
+  <text x="868" y="432" text-anchor="end" class="lbl" fill="#a33a3a">falla tras reintentos</text>
+
+  <!-- Externos izquierda -->
+  <rect x="20" y="95" width="160" height="105" rx="10" fill="#f2f2f2" stroke="#5a5a5a" stroke-width="2"/>
+  <text x="100" y="125" text-anchor="middle" class="t">Solicitud</text>
+  <text x="100" y="150" text-anchor="middle" class="s">POST /webhook/</text>
+  <text x="100" y="168" text-anchor="middle" class="s">agente-pricing</text>
+  <text x="100" y="186" text-anchor="middle" class="s">consulta + requestId</text>
+  <line x1="180" y1="130" x2="218" y2="130" class="ln" marker-end="url(#a)"/>
+  <line x1="222" y1="168" x2="184" y2="168" stroke="#4a4a4a" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#a)"/>
+  <text x="100" y="222" text-anchor="middle" class="s" fill="#1f3a68" font-weight="700">← 202 «recibido» + código</text>
+
+  <rect x="20" y="265" width="160" height="105" rx="10" fill="#f2f2f2" stroke="#5a5a5a" stroke-width="2"/>
+  <text x="100" y="300" text-anchor="middle" class="t">Usuario</text>
+  <text x="100" y="325" text-anchor="middle" class="s">recibe solo respuestas</text>
+  <text x="100" y="343" text-anchor="middle" class="s">validadas, por mail</text>
+  <line x1="222" y1="317" x2="184" y2="317" stroke="#2e7d32" stroke-width="2.6" marker-end="url(#ag)"/>
+
+  <!-- Externos derecha -->
+  <rect x="930" y="95" width="250" height="105" rx="10" fill="#f2f2f2" stroke="#5a5a5a" stroke-width="2"/>
+  <text x="1055" y="125" text-anchor="middle" class="t">Modelo de lenguaje</text>
+  <text x="1055" y="150" text-anchor="middle" class="s">Gemini Flash (prototipo en</text>
+  <text x="1055" y="168" text-anchor="middle" class="s">tier gratuito); migrable a</text>
+  <text x="1055" y="186" text-anchor="middle" class="s">tier pago, Claude o GPT-4o-mini</text>
+  <path d="M930,140 L882,140" stroke="#4a4a4a" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
+  <path d="M1000,200 L1000,300 L882,300" stroke="#4a4a4a" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
+
+  <rect x="930" y="440" width="250" height="110" rx="10" fill="#f6e0e0" stroke="#a33a3a" stroke-width="2"/>
+  <text x="1055" y="457" text-anchor="middle" class="tag" style="fill:#a33a3a">WORKFLOW INDEPENDIENTE</text>
+  <text x="1055" y="478" text-anchor="middle" class="t">Alertas de error</text>
+  <text x="1055" y="502" text-anchor="middle" class="s">cualquier falla no prevista</text>
+  <text x="1055" y="520" text-anchor="middle" class="s">(credencial vencida, API caída)</text>
+  <text x="1055" y="538" text-anchor="middle" class="s">→ aviso por Telegram</text>
+  <line x1="900" y1="495" x2="926" y2="495" stroke="#a33a3a" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#ar)"/>
+
+  <!-- Persistencia -->
+  <text x="600" y="625" text-anchor="middle" font-size="14" font-weight="700" fill="#5a5a5a">PERSISTENCIA Y GOBIERNO</text>
+  <rect x="60" y="645" width="330" height="115" rx="10" fill="#f2f2f2" stroke="#5a5a5a" stroke-width="2"/>
+  <text x="225" y="675" text-anchor="middle" class="t">log_trazabilidad_agente</text>
+  <text x="225" y="700" text-anchor="middle" class="s">1 fila por requestId: consulta, respuesta,</text>
+  <text x="225" y="718" text-anchor="middle" class="s">rúbrica JSON del Juez, decisión, estado,</text>
+  <text x="225" y="736" text-anchor="middle" class="s">revisión humana y fechas</text>
+
+  <rect x="435" y="645" width="330" height="115" rx="10" fill="#f2f2f2" stroke="#5a5a5a" stroke-width="2"/>
+  <text x="600" y="675" text-anchor="middle" class="t">memoria_sesiones</text>
+  <text x="600" y="700" text-anchor="middle" class="s">memoria de largo plazo por Session_ID:</text>
+  <text x="600" y="718" text-anchor="middle" class="s">resumen consolidado, estado del caso</text>
+  <text x="600" y="736" text-anchor="middle" class="s">y datos clave (sin transcripciones)</text>
+
+  <rect x="810" y="645" width="330" height="115" rx="10" fill="#f2f2f2" stroke="#5a5a5a" stroke-width="2"/>
+  <text x="975" y="675" text-anchor="middle" class="t">Base de conocimiento</text>
+  <text x="975" y="700" text-anchor="middle" class="s">Política de Pricing · FAQ · Catálogo</text>
+  <text x="975" y="718" text-anchor="middle" class="s">(vector store con metadato «fuente»)</text>
+  <text x="975" y="736" text-anchor="middle" class="s">+ catálogo en Google Sheets</text>
+
+  <line x1="260" y1="590" x2="230" y2="641" stroke="#8a8a8a" stroke-width="2" stroke-dasharray="3 4" marker-end="url(#a)"/>
+  <line x1="420" y1="590" x2="470" y2="641" stroke="#8a8a8a" stroke-width="2" stroke-dasharray="3 4" marker-end="url(#a)"/>
+  <line x1="800" y1="590" x2="900" y2="641" stroke="#8a8a8a" stroke-width="2" stroke-dasharray="3 4" marker-end="url(#a)"/>
+</svg>
