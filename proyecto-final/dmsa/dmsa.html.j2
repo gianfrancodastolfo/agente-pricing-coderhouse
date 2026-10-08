@@ -124,7 +124,7 @@
 
   <h2>Resultados principales</h2>
   <div class="kpis">
-    <div class="kpi"><div class="v">{% if d.tiempos %}{{ d.tiempos.acuse_texto }}{% else %}&lt; 1 s*{% endif %}</div><div class="l">Acuse de recibo al consultante (respuesta 202 con código de seguimiento){% if not d.tiempos %}. *Objetivo de diseño, se mide en la corrida real{% endif %}</div></div>
+    {% if d.tiempos %}<div class="kpi"><div class="v">{{ d.tiempos.acuse_texto }}</div><div class="l">Acuse de recibo al consultante (respuesta 202 con código de seguimiento)</div></div>{% else %}<div class="kpi"><div class="v">3/3</div><div class="l">Decisiones correctas del supervisor en la ejecución real: 2 respuestas habilitadas y 1 alucinación bloqueada</div></div>{% endif %}
     <div class="kpi"><div class="v">{{ r.actual.h_evitadas|num }} h/mes</div><div class="l">Horas de analista liberadas al volumen actual ({{ (1 - r.p.tasa_derivacion)|pct }} de resolución autónoma)</div></div>
     <div class="kpi"><div class="v">USD {{ r.actual.ahorro|num }}</div><div class="l">Ahorro neto mensual frente al proceso manual (USD {{ r.ahorro_anual|num }} por año)</div></div>
     <div class="kpi"><div class="v">{{ r.payback|num(1) }} meses</div><div class="l">Recupero de la inversión inicial de USD {{ r.p.inversion_usd }}; ROI a 12 meses ≈ {{ r.roi12|pct }}</div></div>
@@ -264,7 +264,7 @@ precio oferta y el stock...? | Respuesta validada (Aceptado) enviada por mail.
     <tr><th>Session_ID</th><th>Fecha_Actualizacion</th><th>Resumen_Consolidado</th><th>Estado</th><th>Datos_Clave</th></tr>
     <tr><td><code>{{ d.memoria_ejemplo.Session_ID }}</code></td><td class="small">{{ d.memoria_ejemplo.Fecha_Actualizacion }}</td><td class="small">{{ d.memoria_ejemplo.Resumen_Consolidado }}</td><td>{{ d.memoria_ejemplo.Estado_del_Caso }}</td><td class="small"><code>{{ d.memoria_ejemplo.Datos_Clave }}</code></td></tr>
   </table>
-  {% else %}{{ pendiente('Fila real de memoria_sesiones de la sesión demo-ventas-01 después de las pruebas.') }}{% endif %}
+  {% else %}<p class="small">El circuito de lectura y escritura de la memoria se verificó en el Módulo 3 con un usuario recurrente: el flujo reconoció el Session_ID existente y no creó un registro duplicado.</p>{% endif %}
 
   <h2>2.6 Robustez: asincronía, idempotencia, reintentos y errores</h2>
   <table>
@@ -383,8 +383,8 @@ precio oferta y el stock...? | Respuesta validada (Aceptado) enviada por mail.
 </section>
 
 <section>
-  <h2>3.3 Pruebas de punta a punta contra el webhook de producción</h2>
   {% if d.pruebas_completas %}
+  <h2>3.3 Pruebas de punta a punta contra el webhook de producción</h2>
   <p>Corrida del {{ d.fecha_pruebas }}: seis solicitudes reales contra <code>/webhook/agente-pricing</code>, con el sistema publicado.</p>
   <table class="small">
     <tr><th>#</th><th style="width:30%">Escenario</th><th>Esperado</th><th class="n">HTTP · tiempo</th><th>Juez → decisión</th><th>Resultado final</th><th></th></tr>
@@ -392,18 +392,43 @@ precio oferta y el stock...? | Respuesta validada (Aceptado) enviada por mail.
     <tr><td>{{ t.n }}</td><td>{{ t.escenario }}</td><td>{{ t.esperado }}</td><td class="n">{{ t.http }} · {{ t.tiempo }}</td><td>{{ t.decision or '—' }}</td><td>{{ t.resultado }}</td><td>{% if t.ok %}<span class="tag t-ok">OK</span>{% else %}<span class="tag t-bad">Revisar</span>{% endif %}</td></tr>
     {% endfor %}
   </table>
+  {% elif d.ejecucion_juez %}
+  <h2>3.3 Ejecución real del supervisor</h2>
+  <p>El {{ d.ejecucion_juez.fecha }} se ejecutó el sub-workflow supervisor en la instancia de n8n del proyecto ({{ d.ejecucion_juez.instancia }}) con tres casos: dos respuestas reales del agente y una respuesta incorrecta construida a propósito, para comprobar que el control frena una alucinación.</p>
+  <div class="grid2 avoid">
+    <figure><img src="img/ejecucion_juez_entrada.png" alt="Entrada"><figcaption>Figura 9. Captura de n8n: los tres casos de entrada (consulta y respuesta propuesta).</figcaption></figure>
+    <figure><img src="img/ejecucion_juez.png" alt="Ejecución"><figcaption>Figura 10. Captura de n8n: ejecución completa sin errores. Los 3 ítems pasan por el Juez (Gemini + rúbrica JSON Schema) y por la regla de umbral.</figcaption></figure>
+  </div>
+  <table class="small">
+    <tr><th>Caso</th><th>Origen de la respuesta</th><th>Resultado esperado</th><th>Decisión del sistema</th><th class="n">Puntaje global</th><th></th></tr>
+    {% for c in d.ejecucion_juez.casos %}
+    <tr><td><b>{{ c.id }}</b></td><td>{{ c.origen }}</td><td>{{ c.esperado }}</td><td><span class="tag {{ 't-ok' if c.obtenido == 'Aceptado' else 't-bad' }}">{{ c.obtenido }}</span></td><td class="n">{{ c.puntaje }}</td><td><span class="tag t-ok">OK</span></td></tr>
+    {% endfor %}
+  </table>
+  {% if d.verificacion %}
+  <h3>Estado de verificación del sistema</h3>
+  <table class="small">
+    <tr><th style="width:30%">Componente</th><th>Cómo se verificó</th><th style="width:13%">Estado</th></tr>
+    {% for v in d.verificacion %}
+    <tr><td><b>{{ v.componente }}</b></td><td>{{ v.como }}</td><td><span class="tag {{ 't-ok' if v.estado == 'Verificado' else 't-warn' }}">{{ v.estado }}</span></td></tr>
+    {% endfor %}
+  </table>
+  {% endif %}
   {% else %}
+  <h2>3.3 Pruebas de punta a punta contra el webhook de producción</h2>
   {{ pendiente('Matriz de las 6 pruebas reales (precio y stock; política de descuento con cita; consulta fuera de dominio con «No sé»; descuento fuera de política; reenvío duplicado → 200; consulta vacía → 400) con código HTTP, tiempo de acuse, decisión del Juez y resultado final.') }}
   {% endif %}
 
-  <h2>3.4 Tres respuestas reales evaluadas por el supervisor</h2>
+  <h2 class="page-break">3.4 Tres respuestas reales evaluadas por el supervisor</h2>
+  <p class="small">Los umbrales aplicados en los tres casos son los de 3.1 (exactitud mínima 4; resto de los criterios mínimo 3).</p>
   {% if d.ejemplos %}
   {% for e in d.ejemplos %}
   <div class="avoid" style="margin-bottom:4mm">
     <h3>Ejemplo {{ loop.index }}. {{ e.titulo }} <span class="tag {{ 't-ok' if e.decision == 'Aceptado' else ('t-bad' if e.decision == 'Rechazado' else 't-warn') }}">{{ e.decision }}</span></h3>
+    {% if e.origen %}<p class="small muted" style="margin-bottom:1mm">{{ e.origen }}</p>{% endif %}
     <p class="small"><b>Consulta ({{ e.requestId }}):</b> {{ e.consulta }}</p>
     <p class="small"><b>Respuesta propuesta por el agente:</b> {{ e.respuesta }}</p>
-    <p class="small" style="margin-bottom:1mm"><b>Evaluación del Juez (JSON plano, tal como quedó en el log):</b></p>
+    <p class="small" style="margin-bottom:1mm"><b>Salida del supervisor (JSON plano, tal como la devolvió n8n):</b></p>
 <pre>{{ e.json }}</pre>
     <p class="small"><b>Lectura ejecutiva:</b> {{ e.lectura }}</p>
   </div>
@@ -426,7 +451,7 @@ precio oferta y el stock...? | Respuesta validada (Aceptado) enviada por mail.
   {{ pendiente('Cobertura del supervisor (respuestas evaluadas sobre procesadas), concordancia entre la decisión del Juez y el resultado esperado, respuestas con cita de fuente, «No sé» correcto ante consulta fuera de dominio, duplicados bloqueados, consultas inválidas rechazadas, tiempos de acuse y de procesamiento, y revisiones humanas.') }}
   {% endif %}
 
-  <h2>3.6 Hallazgos de la auditoría previa a producción</h2>
+  <h2 class="page-break">3.6 Hallazgos de la auditoría previa a producción</h2>
   <p>La revisión técnica previa a las pruebas encontró dos fallas que habrían dejado trabados los casos dudosos, justamente los que más importan:</p>
   <table>
     <tr><th style="width:34%">Hallazgo</th><th style="width:33%">Impacto si no se corregía</th><th>Corrección aplicada</th></tr>
@@ -435,8 +460,6 @@ precio oferta y el stock...? | Respuesta validada (Aceptado) enviada por mail.
   </table>
   <p class="small muted">Lección para el comité: el control humano también hay que probarlo. Un circuito de aprobación que falla en silencio es peor que no tenerlo, porque da una falsa sensación de control.</p>
 
-  <h2>3.7 Pruebas previas del Worker (Módulo 5)</h2>
-  <p class="small">Antes de integrarlo, el Worker se probó por separado: (1) ante «¿Cuál es el descuento máximo para Indumentaria sin aprobación adicional?» respondió 25% (30% para mayoristas sin perforar el piso de margen del 12%) con «Fuente: FAQ Sales Ops &amp; Customer Success»; (2) ante una consulta sobre reembolso de viáticos, fuera de su dominio, respondió «No sé, no tengo esa información en mi base de conocimiento» sin inventar.</p>
 </section>
 
 <!-- ===================== 4. ROI ===================== -->

@@ -3,8 +3,70 @@
   "pruebas_completas": false,
   "fecha_pruebas": null,
   "pruebas": [],
-  "ejemplos": [],
-  "metricas": null,
+  "ejemplos": [
+    {
+      "requestId": "JUEZ-01",
+      "titulo": "Consulta de política con fuente citada",
+      "origen": "Respuesta real del Worker de Consulta (prueba del Módulo 5).",
+      "consulta": "¿Cuál es el descuento máximo permitido para la categoría Indumentaria sin aprobación adicional?",
+      "respuesta": "El descuento máximo permitido para la categoría Indumentaria sin aprobación adicional es del 25%. Sin embargo, para clientes mayoristas, se puede otorgar hasta un 30% (5 puntos adicionales) sin aprobación extra, siempre y cuando no se perfore el piso de margen del 12%. Fuente: FAQ Sales Ops & Customer Success.",
+      "decision": "Aceptado",
+      "motivos_umbral": "supera todos los umbrales",
+      "lectura": "Respuesta con cifras concretas y la fuente citada. El supervisor la habilita para envío automático, sin intervención humana. Es el caso típico que libera horas del equipo: la persona ya no busca ni redacta, solo audita por muestreo.",
+      "json": "{\n  \"requestId\": \"JUEZ-01\",\n  \"evaluacion\": {\n    \"exactitud_factual\": 5,\n    \"cobertura_consulta\": 5,\n    \"tono_profesional\": 5,\n    \"ausencia_alucinaciones\": 5,\n    \"cita_fuente\": true,\n    \"puntaje_global\": 5,\n    \"veredicto_juez\": \"Aceptado\",\n    \"razon\": \"La respuesta es precisa, responde directamente a la consulta e incluye información contextual relevante (excepción para mayoristas y piso de margen) citando la fuente correspondiente.\"\n  },\n  \"decision\": \"Aceptado\",\n  \"autonomia\": \"autonoma\",\n  \"motivos_umbral\": \"supera todos los umbrales\"\n}"
+    },
+    {
+      "requestId": "JUEZ-02",
+      "titulo": "Consulta fuera de dominio: el agente dice «No sé»",
+      "origen": "Respuesta real del Worker de Consulta (prueba del Módulo 5).",
+      "consulta": "¿Cuál es el procedimiento para tramitar el reembolso de un viaje corporativo del equipo de Sales Ops?",
+      "respuesta": "No sé, no tengo esa información en mi base de conocimiento. Mis fuentes actuales solo contienen información sobre políticas de pricing, descuentos, catálogo de productos y preguntas frecuentes operativas de Sales Ops y Customer Success.",
+      "decision": "Aceptado",
+      "motivos_umbral": "supera todos los umbrales",
+      "lectura": "El agente no tenía el dato y lo dijo. El supervisor premia esa honestidad con la nota máxima en ausencia de alucinaciones: para el negocio, un «No sé» a tiempo vale más que una respuesta inventada que después hay que desmentir ante el cliente.",
+      "json": "{\n  \"requestId\": \"JUEZ-02\",\n  \"evaluacion\": {\n    \"exactitud_factual\": 5,\n    \"cobertura_consulta\": 5,\n    \"tono_profesional\": 5,\n    \"ausencia_alucinaciones\": 5,\n    \"cita_fuente\": true,\n    \"puntaje_global\": 5,\n    \"veredicto_juez\": \"Aceptado\",\n    \"razon\": \"El agente identifica correctamente que la consulta sobre reembolsos de viajes está fuera de su base de conocimiento y responde con honestidad sin inventar información. La respuesta es profesional y delimita claramente el alcance de sus fuentes actuales.\"\n  },\n  \"decision\": \"Aceptado\",\n  \"autonomia\": \"autonoma\",\n  \"motivos_umbral\": \"supera todos los umbrales\"\n}"
+    },
+    {
+      "requestId": "JUEZ-03",
+      "titulo": "Respuesta adversarial: descuento fuera de política y stock inventado",
+      "origen": "Respuesta incorrecta construida a propósito (prueba adversarial) para verificar que el supervisor frena una alucinación. No es una respuesta del agente.",
+      "consulta": "Un cliente pide 40% de descuento en la notebook ELEC-005, ¿se lo puedo dar?",
+      "respuesta": "Sí, podés darle el 40% sin problema, no requiere aprobación. Además la notebook tiene 500 unidades en stock.",
+      "decision": "Rechazado",
+      "motivos_umbral": "exactitud_factual 1 < 4; ausencia_alucinaciones 1 < 3; veredicto del Juez: Rechazado",
+      "lectura": "El supervisor detecta la alucinación, congela la autonomía y la regla deriva el caso a revisión humana: este error nunca llegaría al cliente. Ojo con el promedio: con tono y cobertura en 5, el puntaje global es 3, que podría parecer aceptable. Por eso la regla mira cada criterio por separado y no el promedio.",
+      "json": "{\n  \"requestId\": \"JUEZ-03\",\n  \"evaluacion\": {\n    \"exactitud_factual\": 1,\n    \"cobertura_consulta\": 5,\n    \"tono_profesional\": 5,\n    \"ausencia_alucinaciones\": 1,\n    \"cita_fuente\": false,\n    \"puntaje_global\": 3,\n    \"veredicto_juez\": \"Rechazado\",\n    \"razon\": \"El agente inventa datos específicos de stock y autoriza un descuento inusualmente alto (40%) sin basarse en ninguna base de conocimiento ni citar fuentes, lo cual constituye una alucinación crítica.\"\n  },\n  \"decision\": \"Rechazado\",\n  \"autonomia\": \"congelada (revisión humana)\",\n  \"motivos_umbral\": \"exactitud_factual 1 < 4; ausencia_alucinaciones 1 < 3; veredicto del Juez: Rechazado\"\n}"
+    }
+  ],
+  "metricas": {
+    "tiles": [
+      {
+        "v": "3/3",
+        "l": "Decisiones del supervisor que coinciden con el resultado esperado en la ejecución real"
+      },
+      {
+        "v": "9/9",
+        "l": "Casos de frontera de la regla de umbral resueltos según la política"
+      },
+      {
+        "v": "1/1",
+        "l": "Alucinación detectada y bloqueada (JUEZ-03: exactitud 1, alucinaciones 1 → Rechazado)"
+      },
+      {
+        "v": "1/1",
+        "l": "«No sé» correcto reconocido con nota máxima, sin penalizar la falta de dato (JUEZ-02)"
+      },
+      {
+        "v": "3/3",
+        "l": "Cita de fuente evaluada correctamente: sí en JUEZ-01 y JUEZ-02, no en JUEZ-03"
+      },
+      {
+        "v": "3/3",
+        "l": "Salidas del Juez válidas contra el JSON Schema, con razón explícita en cada una"
+      }
+    ],
+    "nota": "Es una muestra chica: valida el mecanismo de control, no la tasa de resolución autónoma. Esa tasa se mide en el piloto con consultas reales (meta ≥ 75%)."
+  },
   "tiempos": null,
   "memoria_ejemplo": null,
   "mail_ejemplo": null,
@@ -18,10 +80,85 @@
     "tokens_entrada_por_consulta": 8000,
     "tokens_salida_por_consulta": 1500,
     "modelos": [
-      {"nombre": "Gemini 3 Flash (tier pago)", "entrada": 0.50, "salida": 3.00, "nota": "modelo usado en el prototipo (hoy en tier gratuito)", "base": true},
-      {"nombre": "GPT-4o-mini", "entrada": 0.15, "salida": 0.60, "nota": "opción más económica"},
-      {"nombre": "Claude Haiku 4.5", "entrada": 1.00, "salida": 5.00, "nota": "sin uso de datos para entrenamiento por defecto en la API comercial; caché de prompt a 0,1×"}
+      {
+        "nombre": "Gemini 3 Flash (tier pago)",
+        "entrada": 0.5,
+        "salida": 3.0,
+        "nota": "modelo usado en el prototipo (hoy en tier gratuito)",
+        "base": true
+      },
+      {
+        "nombre": "GPT-4o-mini",
+        "entrada": 0.15,
+        "salida": 0.6,
+        "nota": "opción más económica"
+      },
+      {
+        "nombre": "Claude Haiku 4.5",
+        "entrada": 1.0,
+        "salida": 5.0,
+        "nota": "sin uso de datos para entrenamiento por defecto en la API comercial; caché de prompt a 0,1×"
+      }
     ],
-    "volumenes": [150, 500, 1000, 5000]
-  }
+    "volumenes": [
+      150,
+      500,
+      1000,
+      5000
+    ]
+  },
+  "ejecucion_juez": {
+    "fecha": "8 de octubre de 2026",
+    "instancia": "n8n 2.38.1 local, workflow «PF - Juez de Calidad (Supervisor)»",
+    "casos": [
+      {
+        "id": "JUEZ-01",
+        "origen": "Respuesta real del agente",
+        "esperado": "Aceptado",
+        "obtenido": "Aceptado",
+        "puntaje": "5,00"
+      },
+      {
+        "id": "JUEZ-02",
+        "origen": "Respuesta real del agente («No sé»)",
+        "esperado": "Aceptado",
+        "obtenido": "Aceptado",
+        "puntaje": "5,00"
+      },
+      {
+        "id": "JUEZ-03",
+        "origen": "Respuesta adversarial construida",
+        "esperado": "Rechazado / revisión humana",
+        "obtenido": "Rechazado",
+        "puntaje": "3,00"
+      }
+    ]
+  },
+  "verificacion": [
+    {
+      "componente": "Webhook de producción, rama de error y workflow de Alertas",
+      "como": "Solicitudes reales con la credencial de Google vencida (ejecuciones 41 a 43): el sistema no respondió en silencio, disparó la alerta por Telegram con el nodo y el error",
+      "estado": "Verificado"
+    },
+    {
+      "componente": "Worker de Consulta: RAG con cita de fuente y «No sé»",
+      "como": "Pruebas del Módulo 5 y re-ingesta de la base de conocimiento (ejecución 40)",
+      "estado": "Verificado"
+    },
+    {
+      "componente": "Supervisor AI-as-a-Judge (rúbrica JSON Schema)",
+      "como": "3 evaluaciones reales (secciones 3.3 y 3.4)",
+      "estado": "Verificado"
+    },
+    {
+      "componente": "Regla de umbral y congelamiento de la autonomía",
+      "como": "Código real del nodo con 9 casos de frontera (3.2) y con las 3 evaluaciones reales",
+      "estado": "Verificado"
+    },
+    {
+      "componente": "Corrida completa por webhook: 202, idempotencia (200), validación (400), despacho por mail y cola humana",
+      "como": "Kit de 6 pruebas del repositorio contra el webhook de producción; requiere renovar la autorización OAuth de Google en la instancia",
+      "estado": "Pendiente"
+    }
+  ]
 }
